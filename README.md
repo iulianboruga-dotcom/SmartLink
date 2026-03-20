@@ -1,2 +1,1 @@
-# SmartLink
-Proiectul de la Inginerie Software
+# Cum lucrezi pe GitHub direct din browser
