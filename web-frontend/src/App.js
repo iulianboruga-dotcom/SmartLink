@@ -1,13 +1,96 @@
 import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import theme from './theme';
+import ProtectedRoute from './components/ProtectedRoute';
 
-function App() {
+// Pagini
+import LoginPage from './components/LoginPage';
+
+// Medic
+import DoctorDashboard from './components/doctor/DoctorDashboard';
+import PatientFile from './components/doctor/PatientFile';
+import AlarmsConfigPage from './components/doctor/AlarmsConfigPage';
+
+// Pacient
+import PatientDashboard from './components/patient/PatientDashboard';
+import PatientRecommendations from './components/patient/PatientRecommendations';
+import PatientAlarms from './components/patient/PatientAlarms';
+import PatientProfile from './components/patient/PatientProfile';
+
+export default function App() {
   return (
-    <div style={{ textAlign: 'center', marginTop: '100px', fontFamily: 'Arial' }}>
-      <h1>SmartLink</h1>
-      <p>Health Monitoring Dashboard</p>
-      <p style={{ color: 'green' }}>Deploy reusit! Claudia si Darius pot incepe lucrul.</p>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <Routes>
+          {/* Public */}
+          <Route path="/" element={<LoginPage />} />
+
+          {/* Medic */}
+          <Route
+            path="/doctor"
+            element={
+              <ProtectedRoute requiredRole="doctor">
+                <DoctorDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/doctor/patient/:id"
+            element={
+              <ProtectedRoute requiredRole="doctor">
+                <PatientFile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/doctor/alarms"
+            element={
+              <ProtectedRoute requiredRole="doctor">
+                <AlarmsConfigPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Pacient */}
+          <Route
+            path="/patient"
+            element={
+              <ProtectedRoute requiredRole="patient">
+                <PatientDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/patient/recommendations"
+            element={
+              <ProtectedRoute requiredRole="patient">
+                <PatientRecommendations />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/patient/alarms"
+            element={
+              <ProtectedRoute requiredRole="patient">
+                <PatientAlarms />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/patient/profile"
+            element={
+              <ProtectedRoute requiredRole="patient">
+                <PatientProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
-
-export default App;
