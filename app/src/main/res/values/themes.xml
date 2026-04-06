@@ -1,0 +1,12 @@
+<resources>
+    <style name="Theme.SmartLinkMulti" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">#00FF00</item>
+        <item name="colorPrimaryVariant">#1B5E20</item>
+        <item name="colorOnPrimary">#000000</item>
+        <item name="colorSurface">#111111</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+        <item name="android:windowBackground">#000000</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#111111</item>
+    </style>
+</resources>

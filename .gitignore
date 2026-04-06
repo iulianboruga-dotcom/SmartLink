@@ -1,0 +1,19 @@
+# Build output
+build/
+app/build/
+.gradle/
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Keystore
+*.jks
+*.keystore
+
+# OS
+.DS_Store
+Thumbs.db

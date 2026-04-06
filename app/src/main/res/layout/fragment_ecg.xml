@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#000000">
+
+    <!-- Status row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="4dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="SmartLink ECG"
+            android:textColor="#00FF00"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvEcgStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Deconectat"
+            android:textColor="#FF4444"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- MTU / Rate / Lead-off row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="6dp">
+
+        <TextView
+            android:id="@+id/tvEcgMtu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="MTU: -- | Rata: --"
+            android:textColor="#4FC3F7"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tvEcgLeadOff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#00FF00"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Packet counter -->
+    <TextView
+        android:id="@+id/tvEcgPackets"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="2dp"
+        android:text="Pkts: 0 | Tot: 0 | Ultim: -- val"
+        android:textColor="#888888"
+        android:textSize="11sp" />
+
+    <!-- Last packet raw -->
+    <TextView
+        android:id="@+id/tvEcgLastPacket"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="6dp"
+        android:text="--"
+        android:textColor="#CCCCCC"
+        android:textSize="11sp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:fontFamily="monospace" />
+
+    <!-- ECG live waveform -->
+    <com.example.smartlink_multi.EcgView
+        android:id="@+id/ecgView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:layout_marginHorizontal="4dp"
+        android:layout_marginBottom="2dp"
+        android:background="#000000" />
+
+    <!-- Log -->
+    <ScrollView
+        android:id="@+id/ecgScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginBottom="4dp"
+        android:background="#0D0D0D">
+
+        <TextView
+            android:id="@+id/tvEcgLog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text=""
+            android:textColor="#00CC00"
+            android:textSize="10sp"
+            android:fontFamily="monospace" />
+    </ScrollView>
+
+    <!-- Connect button -->
+    <Button
+        android:id="@+id/btnEcgConnect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="12dp"
+        android:text="Scaneaza si Conecteaza"
+        android:backgroundTint="#1B5E20"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp" />
+
+</LinearLayout>
