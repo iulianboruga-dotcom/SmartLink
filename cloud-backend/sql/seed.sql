@@ -85,38 +85,38 @@ INSERT INTO alarm_history (patient_id, alarm_type, measured_value, threshold_val
 (@p3, 'TEMP_HIGH',  38.2, 38.0, DATEADD(HOUR,-22, GETDATE()), 1);
 
 -- 9. Recomandări (3 per pacient)
-INSERT INTO recommendations (patient_id, doctor_id, text, priority, created_at)
+INSERT INTO recommendations (patient_id, doctor_id, reco_text, priority, created_at)
 SELECT @p1, d.id, 'Reduceți consumul de sare și grăsimi saturate. Dieta DASH recomandată.', 'high',   DATEADD(DAY, -5, GETDATE())
 FROM doctors d JOIN users u ON d.user_id = u.id WHERE u.email = 'medic@test.com';
 
-INSERT INTO recommendations (patient_id, doctor_id, text, priority, created_at)
+INSERT INTO recommendations (patient_id, doctor_id, reco_text, priority, created_at)
 SELECT @p1, d.id, 'Exerciții fizice moderate: 30 minute de mers pe jos zilnic.', 'medium', DATEADD(DAY, -3, GETDATE())
 FROM doctors d JOIN users u ON d.user_id = u.id WHERE u.email = 'medic@test.com';
 
-INSERT INTO recommendations (patient_id, doctor_id, text, priority, created_at)
+INSERT INTO recommendations (patient_id, doctor_id, reco_text, priority, created_at)
 SELECT @p1, d.id, 'Consultație de control programată pentru săptămâna viitoare.', 'low',    DATEADD(DAY, -1, GETDATE())
 FROM doctors d JOIN users u ON d.user_id = u.id WHERE u.email = 'medic@test.com';
 
-INSERT INTO recommendations (patient_id, doctor_id, text, priority, created_at)
+INSERT INTO recommendations (patient_id, doctor_id, reco_text, priority, created_at)
 SELECT @p2, d.id, 'Medicație antihipertensivă: Amlodipina 5mg/zi dimineața.', 'high',    DATEADD(DAY, -7, GETDATE())
 FROM doctors d JOIN users u ON d.user_id = u.id WHERE u.email = 'medic@test.com';
 
-INSERT INTO recommendations (patient_id, doctor_id, text, priority, created_at)
+INSERT INTO recommendations (patient_id, doctor_id, reco_text, priority, created_at)
 SELECT @p2, d.id, 'Monitorizare tensiune arterială de 2 ori pe zi.', 'high',             DATEADD(DAY, -4, GETDATE())
 FROM doctors d JOIN users u ON d.user_id = u.id WHERE u.email = 'medic@test.com';
 
-INSERT INTO recommendations (patient_id, doctor_id, text, priority, created_at)
+INSERT INTO recommendations (patient_id, doctor_id, reco_text, priority, created_at)
 SELECT @p2, d.id, 'Reducerea stresului: tehnici de respirație și meditație.', 'medium',  DATEADD(DAY, -2, GETDATE())
 FROM doctors d JOIN users u ON d.user_id = u.id WHERE u.email = 'medic@test.com';
 
-INSERT INTO recommendations (patient_id, doctor_id, text, priority, created_at)
+INSERT INTO recommendations (patient_id, doctor_id, reco_text, priority, created_at)
 SELECT @p3, d.id, 'Hidratare corespunzătoare: minim 2 litri de apă pe zi.', 'medium',   DATEADD(DAY, -6, GETDATE())
 FROM doctors d JOIN users u ON d.user_id = u.id WHERE u.email = 'medic@test.com';
 
-INSERT INTO recommendations (patient_id, doctor_id, text, priority, created_at)
+INSERT INTO recommendations (patient_id, doctor_id, reco_text, priority, created_at)
 SELECT @p3, d.id, 'Somn regulat: 7-8 ore pe noapte, program fix.', 'low',               DATEADD(DAY, -3, GETDATE())
 FROM doctors d JOIN users u ON d.user_id = u.id WHERE u.email = 'medic@test.com';
 
-INSERT INTO recommendations (patient_id, doctor_id, text, priority, created_at)
+INSERT INTO recommendations (patient_id, doctor_id, reco_text, priority, created_at)
 SELECT @p3, d.id, 'Evitați efortul fizic intens în perioadele de temperaturi extreme.', 'medium', DATEADD(DAY, -1, GETDATE())
 FROM doctors d JOIN users u ON d.user_id = u.id WHERE u.email = 'medic@test.com';
