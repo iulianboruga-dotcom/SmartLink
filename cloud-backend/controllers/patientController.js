@@ -1,6 +1,6 @@
 const { getPool, sql } = require('../config/db');
 
-// Toți pacienții asociați medicului logat
+// Toti pacientii asociati medicului logat
 async function getAll(req, res, next) {
   try {
     const doctorUserId = req.user.userId;
@@ -81,4 +81,68 @@ async function update(req, res, next) {
   }
 }
 
-module.exports = { getAll, getById, update };
+async function assignDoctor(req, res, next) {
+  try {
+    const { patientId, doctorId } = req.body;
+    const pool = await getPool();
+
+    // verifica daca exista deja asocierea
+    const existing = await pool.request()
+        .input('patientId', sql.Int, patientId)
+        .input('doctorId', sql.Int, doctorId)
+        .query(`
+        SELECT id
+        FROM patient_doctor
+        WHERE patient_id = @patientId
+          AND doctor_id = @doctorId
+      `);
+
+    if (existing.recordset.length > 0) {
+      return res.status(409).json({
+        error: 'Pacientul este deja asociat acestui medic'
+      });
+    }
+
+    // inserare asociere
+    await pool.request()
+        .input('patientId', sql.Int, patientId)
+        .input('doctorId', sql.Int, doctorId)
+        .query(`
+        INSERT INTO patient_doctor (patient_id, doctor_id)
+        VALUES (@patientId, @doctorId)
+      `);
+
+    res.json({
+      success: true,
+      message: 'Pacient asociat cu medicul'
+    });
+
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function unassignDoctor(req, res, next) {
+  try {
+    const { patientId, doctorId } = req.body;
+    const pool = await getPool();
+
+    const result = await pool.request()
+        .input('patientId', sql.Int, patientId)
+        .input('doctorId', sql.Int, doctorId)
+        .query(`
+        DELETE FROM patient_doctor
+        WHERE patient_id = @patientId
+          AND doctor_id = @doctorId
+      `);
+
+    res.json({
+      success: true,
+      message: 'Pacient disociat de medic'
+    });
+
+  } catch (err) {
+    next(err);
+  }
+}
+module.exports = { getAll, getById, update, assignDoctor, unassignDoctor };

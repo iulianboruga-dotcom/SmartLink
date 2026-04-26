@@ -26,7 +26,7 @@ async function getProfile(req, res, next) {
   }
 }
 
-// Toți medicii (util pentru asocierea pacient-medic)
+// Toti medicii (util pentru asocierea pacient-medic)
 async function getAll(req, res, next) {
   try {
     const pool = await getPool();
