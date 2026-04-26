@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { getAll, getById, update, assignDoctor, unassignDoctor } = require('../controllers/patientController');
+const { registerPatient, getAll, getById, update, assignDoctor, unassignDoctor } = require('../controllers/patientController');
 const { verifyToken, requireRole } = require('../middleware/auth');
+const { validatePatientRegister } = require('../middleware/validate')
+
+//POST /api/pacients/register
+router.post('/register', validatePatientRegister, registerPatient);
 
 // GET /api/patients - doar medicul vede lista pacientilor sai
 router.get('/', verifyToken, requireRole('doctor'), getAll);

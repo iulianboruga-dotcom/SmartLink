@@ -19,6 +19,28 @@ const validateRegister = [
   handleValidationErrors,
 ];
 
+const validateDoctorRegister = [
+  body('email').isEmail().withMessage('Email invalid'),
+  body('password').isLength({ min: 6 }).withMessage('Parola trebuie să aibă minim 6 caractere'),
+  body('firstName').notEmpty().withMessage('Prenumele este obligatoriu'),
+  body('lastName').notEmpty().notEmpty().withMessage('Numele este obligatoriu'),
+  body('specialization').notEmpty(),
+  body('clinicName').notEmpty(),
+  handleValidationErrors
+];
+
+const validatePatientRegister = [
+  body('email').isEmail().withMessage('Email invalid'),
+  body('password').isLength({ min: 6 }).withMessage('Parola trebuie să aibă minim 6 caractere'),
+  body('firstName').notEmpty().withMessage('Prenumele este obligatoriu'),
+  body('lastName').notEmpty().withMessage('Numele este obligatoriu'),
+  body('age').isInt({ min: 0 }),
+  body('weight').isFloat({ min: 0 }),
+  body('height').isFloat({ min: 0 }),
+  body('bloodType').notEmpty(),
+  handleValidationErrors
+];
+
 // Validare login
 const validateLogin = [
   body('email').isEmail().withMessage('Email invalid'),
@@ -46,4 +68,4 @@ const validateThresholds = [
   handleValidationErrors,
 ];
 
-module.exports = { validateRegister, validateLogin, validateSensorData, validateThresholds };
+module.exports = { validateRegister, validateLogin, validateSensorData, validateThresholds, validateDoctorRegister, validatePatientRegister };
