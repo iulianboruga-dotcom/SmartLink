@@ -16,7 +16,7 @@ async function create(req, res, next) {
       if (!(await patientExists(pool, patientId))) {
           return res.status(404).json({ error: 'Pacient negasit' });
       }
-      
+
     // Obține doctor_id din user_id
     const doctorResult = await pool.request()
       .input('userId', sql.Int, doctorUserId)
