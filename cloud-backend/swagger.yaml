@@ -1,0 +1,553 @@
+openapi: 3.0.0
+
+info:
+  title: SmartLink API
+  version: 1.0.0
+  description: API monitorizare pacienti
+
+servers:
+  - url: http://localhost:3000/api
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+paths:
+
+  /doctors/register:
+    post:
+      tags:
+        - Doctors
+      summary: Inregistrare doctor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - firstName
+                - lastName
+                - specialization
+                - clinicName
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                specialization:
+                  type: string
+                clinicName:
+                  type: string
+      responses:
+        '201':
+          description: Doctor creat
+        '409':
+          description: Email deja folosit
+        '400':
+          description: Date invalide
+
+  /patients/register:
+    post:
+      tags:
+        - Patients
+      summary: Inregistrare pacient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - firstName
+                - lastName
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                age:
+                  type: integer
+                weight:
+                  type: number
+                height:
+                  type: number
+                bloodType:
+                  type: string
+      responses:
+        '201':
+          description: Pacient creat
+        '409':
+          description: Email deja folosit
+        '400':
+          description: Date invalide
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login utilizator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Token JWT returnat
+
+  /doctors:
+    get:
+      tags:
+        - Doctors
+      summary: Lista tuturor medicilor
+      responses:
+        '200':
+          description: Lista medici
+
+  /doctors/profile:
+    get:
+      tags:
+        - Doctors
+      summary: Profilul medicului logat
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Profil doctor
+        '401':
+          description: Unauthorized
+
+  /patients:
+    get:
+      tags:
+        - Patients
+      summary: Lista pacientilor medicului logat
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Lista pacienti
+        '401':
+          description: Unauthorized
+
+  /patients/assign-doctor:
+    post:
+      tags:
+        - Patients
+      summary: Asociere pacient la doctor
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - patientId
+                - doctorId
+              properties:
+                patientId:
+                  type: integer
+                doctorId:
+                  type: integer
+      responses:
+        '200':
+          description: Asociere realizata
+        '409':
+          description: Asociere existenta
+        '404':
+          description: Pacient sau doctor inexistent
+        '401':
+          description: Unauthorized
+
+  /patients/unassign-doctor:
+    delete:
+      tags:
+        - Patients
+      summary: Stergere asociere pacient-doctor
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - patientId
+                - doctorId
+              properties:
+                patientId:
+                  type: integer
+                doctorId:
+                  type: integer
+      responses:
+        '200':
+          description: Asociere stearsa
+        '404':
+          description: Asociere inexistenta
+
+  /patients/{id}:
+    get:
+      tags:
+        - Patients
+      summary: Detalii pacient dupa ID
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Date pacient
+
+    put:
+      tags:
+        - Patients
+      summary: Update pacient
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                age:
+                  type: integer
+                weight:
+                  type: number
+                height:
+                  type: number
+                bloodType:
+                  type: string
+      responses:
+        '200':
+          description: Pacient actualizat
+  /sensors:
+    post:
+      tags:
+        - Sensors
+      summary: Primire date senzori de la aplicatia Android
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - patientId
+                - pulse
+                - humidity
+                - temperature
+              properties:
+                patientId:
+                  type: integer
+                pulse:
+                  type: number
+                  minimum: 0
+                  maximum: 300
+                humidity:
+                  type: number
+                  minimum: 0
+                  maximum: 100
+                temperature:
+                  type: number
+      responses:
+        '201':
+          description: Date salvate
+        '400':
+          description: Date invalide
+        '404':
+          description: Pacient negasit
+
+  /sensors/ecg:
+    post:
+      tags:
+        - Sensors
+      summary: Primire date ECG
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - patientId
+                - values
+              properties:
+                patientId:
+                  type: integer
+                values:
+                  type: array
+                  items:
+                    type: number
+      responses:
+        '201':
+          description: Date salvate
+
+  /sensors/accelerometer:
+    post:
+      tags:
+        - Sensors
+      summary: Primire date accelerometru
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - patientId
+                - values
+              properties:
+                patientId:
+                  type: integer
+                values:
+                  type: array
+                  items:
+                    type: number
+      responses:
+        '201':
+          description: Date accelerometru salvate
+
+  /sensors/history:
+    get:
+      tags:
+        - Sensors
+      summary: Istoric date senzori
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - in: query
+          name: patientId
+          schema:
+            type: integer
+        - in: query
+          name: startDate
+          schema:
+            type: string
+        - in: query
+          name: endDate
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Istoric senzori
+
+  /alarms:
+    post:
+      tags:
+        - Alarms
+      summary: Raportare alarma de la aplicatia Android
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - patientId
+                - type
+                - value
+                - threshold
+              properties:
+                patientId:
+                  type: integer
+                type:
+                  type: string
+                value:
+                  type: number
+                threshold:
+                  type: number
+      responses:
+        '201':
+          description: Alarma salvata
+        '400':
+          description: Date incomplete
+        '404':
+          description: Pacient negasit
+
+  /alarms/history:
+    get:
+      tags:
+        - Alarms
+      summary: Istoric alarme
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - in: query
+          name: patientId
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista alarme
+
+  /alarms/thresholds/{patientId}:
+    get:
+      tags:
+        - Alarms
+      summary: Praguri alarma pacient
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - in: path
+          name: patientId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Praguri pacient
+
+    put:
+      tags:
+        - Alarms
+      summary: Setare praguri alarma de catre doctor
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - in: path
+          name: patientId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pulseMin
+                - pulseMax
+                - tempMin
+                - tempMax
+                - humMin
+                - humMax
+              properties:
+                pulseMin:
+                  type: number
+                pulseMax:
+                  type: number
+                tempMin:
+                  type: number
+                tempMax:
+                  type: number
+                humMin:
+                  type: number
+                humMax:
+                  type: number
+      responses:
+        '200':
+          description: Praguri actualizate
+
+  /alarms/{id}/acknowledge:
+    patch:
+      tags:
+        - Alarms
+      summary: Confirmare alarma de catre doctor
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Alarma confirmata
+
+  /recommendations:
+    post:
+      tags:
+        - Recommendations
+      summary: Adaugare recomandare de catre doctor
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                patientId:
+                  type: integer
+                text:
+                  type: string
+                priority:
+                  type: string
+      responses:
+        '201':
+          description: Recomandare adaugata
+
+  /recommendations/{patientId}:
+    get:
+      tags:
+        - Recommendations
+      summary: Lista recomandari pacient
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - in: path
+          name: patientId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista recomandari
+
+  /recommendations/{id}:
+    delete:
+      tags:
+        - Recommendations
+      summary: Stergere recomandare
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Recomandare stearsa
