@@ -1,11 +1,21 @@
 const { getPool, sql } = require('../config/db');
+const { patientExists } = require('../utilities/utils');
 
 // Creare recomandare nouă de la medic
 async function create(req, res, next) {
   try {
     const { patientId, text, priority } = req.body;
     const doctorUserId = req.user.userId;
+
+      if (!patientId || !text) {
+          return res.status(400).json({ error: 'Date incomplete' });
+      }
+
     const pool = await getPool();
+
+      if (!(await patientExists(pool, patientId))) {
+          return res.status(404).json({ error: 'Pacient negasit' });
+      }
 
     // Obține doctor_id din user_id
     const doctorResult = await pool.request()
@@ -24,7 +34,7 @@ async function create(req, res, next) {
       .input('text', sql.NVarChar(sql.MAX), text)
       .input('priority', sql.NVarChar, priority || 'medium')
       .query(`
-        INSERT INTO recommendations (patient_id, doctor_id, text, priority)
+        INSERT INTO recommendations (patient_id, doctor_id, reco_text, priority)
         OUTPUT INSERTED.id, INSERTED.created_at
         VALUES (@patientId, @doctorId, @text, @priority)
       `);
@@ -41,10 +51,13 @@ async function getByPatient(req, res, next) {
     const { patientId } = req.params;
     const pool = await getPool();
 
+      if (!(await patientExists(pool, patientId))) {
+          return res.status(404).json({ error: 'Pacient negasit' });
+      }
     const result = await pool.request()
       .input('patientId', sql.Int, patientId)
       .query(`
-        SELECT r.id, r.text, r.priority, r.created_at,
+        SELECT r.id, r.reco_text, r.priority, r.created_at,
                u.first_name AS doctor_first_name, u.last_name AS doctor_last_name
         FROM recommendations r
         JOIN doctors d ON r.doctor_id = d.id
@@ -65,9 +78,13 @@ async function deleteRecommendation(req, res, next) {
     const { id } = req.params;
     const pool = await getPool();
 
-    await pool.request()
+      const result = await pool.request()
       .input('id', sql.Int, id)
       .query('DELETE FROM recommendations WHERE id = @id');
+
+      if (result.rowsAffected[0] === 0) {
+          return res.status(404).json({ error: 'Recomandare negasita' });
+      }
 
     res.json({ success: true });
   } catch (err) {

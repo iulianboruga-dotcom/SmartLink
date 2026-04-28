@@ -3,6 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+
 const authRoutes = require('./routes/authRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const sensorRoutes = require('./routes/sensorRoutes');
@@ -12,6 +15,9 @@ const doctorRoutes = require('./routes/doctorRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+
+const swaggerDocument = YAML.load('./swagger.yaml');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Middleware securitate
 app.use(helmet());

@@ -1,10 +1,20 @@
 const { getPool, sql } = require('../config/db');
+const { patientExists } = require('../utilities/utils');
 
 // Primire date senzori de la aplicația Android (trimise de ESP32 via BLE)
 async function receiveSensorData(req, res, next) {
   try {
     const { patientId, pulse, temperature, humidity } = req.body;
+
+    if (!patientId || pulse == null || temperature == null || humidity == null) {
+      return res.status(400).json({ error: 'Date incomplete' });
+    }
+
     const pool = await getPool();
+
+    if (!(await patientExists(pool, patientId))) {
+      return res.status(404).json({ error: 'Pacient negasit' });
+    }
 
     const result = await pool.request()
       .input('patientId', sql.Int, patientId)
@@ -27,13 +37,22 @@ async function receiveSensorData(req, res, next) {
 async function receiveECG(req, res, next) {
   try {
     const { patientId, values } = req.body;
+
+    if (!patientId || !Array.isArray(values) || values.length === 0) {
+      return res.status(400).json({ error: 'Date ECG invalide' });
+    }
+
     const pool = await getPool();
+
+    if (!(await patientExists(pool, patientId))) {
+      return res.status(404).json({ error: 'Pacient negasit' });
+    }
 
     await pool.request()
       .input('patientId', sql.Int, patientId)
       .input('values', sql.NVarChar(sql.MAX), JSON.stringify(values))
       .query(`
-        INSERT INTO ecg_data (patient_id, values)
+        INSERT INTO ecg_data (patient_id, ecg_values)
         VALUES (@patientId, @values)
       `);
 
@@ -47,13 +66,22 @@ async function receiveECG(req, res, next) {
 async function receiveAccelerometer(req, res, next) {
   try {
     const { patientId, values } = req.body;
+
+    if (!patientId || !Array.isArray(values) || values.length === 0) {
+      return res.status(400).json({ error: 'Date accelerometru invalide' });
+    }
+
     const pool = await getPool();
+
+    if (!(await patientExists(pool, patientId))) {
+      return res.status(404).json({ error: 'Pacient negasit' });
+    }
 
     await pool.request()
       .input('patientId', sql.Int, patientId)
       .input('values', sql.NVarChar(sql.MAX), JSON.stringify(values))
       .query(`
-        INSERT INTO accelerometer_data (patient_id, values)
+        INSERT INTO accelerometer_data (patient_id, accel_values)
         VALUES (@patientId, @values)
       `);
 
@@ -67,7 +95,16 @@ async function receiveAccelerometer(req, res, next) {
 async function getHistory(req, res, next) {
   try {
     const { patientId, startDate, endDate } = req.query;
+
+    if (!patientId) {
+      return res.status(400).json({ error: 'patientId obligatoriu' });
+    }
+
     const pool = await getPool();
+
+    if (!(await patientExists(pool, patientId))) {
+      return res.status(404).json({ error: 'Pacient negasit' });
+    }
 
     const request = pool.request()
       .input('patientId', sql.Int, patientId);
