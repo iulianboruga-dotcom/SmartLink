@@ -32,6 +32,8 @@ import {
   getRecommendations,
 } from "../../api";
 import { getPatientStatus } from "../../mockData";
+import Button from "@mui/material/Button";
+import AddPatientForm from "./AddPatientForm";
 
 const C = {
   blue: "#4B6CF5",
@@ -272,7 +274,11 @@ export default function DoctorDashboard() {
   ).length;
 
   const navItems = [
-    { label: 'Alarme', path: '/doctor/alarms-list', icon: <NotificationsActiveIcon /> },
+    {
+      label: "Alarme",
+      path: "/doctor/alarms-list",
+      icon: <NotificationsActiveIcon />,
+    },
 
     {
       label: "Programări",
@@ -454,7 +460,6 @@ export default function DoctorDashboard() {
           </Box>
         </Box>
       </Box>
-
       <Box
         sx={{
           flex: 1,
@@ -590,17 +595,34 @@ export default function DoctorDashboard() {
                 {/* Search */}
                 <Box
                   sx={{
+                    position: "relative",
                     display: "flex",
                     alignItems: "center",
                     gap: 0.8,
-                    bgcolor: C.bg,
+                    bgcolor: "#7493df",
                     borderRadius: "8px",
                     px: 1.2,
                     py: 0.7,
                     border: `1px solid ${C.border}`,
                   }}
                 >
-                  <SearchIcon sx={{ fontSize: 14, color: C.muted }} />
+                  <Button
+                    variant="contained"
+                    sx={{
+                      position: "absolute",
+                      left: -150, // scoatem butonul în afară spre stânga
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      height: 28,
+                      bgcolor: "#7493df",
+                    }}
+                    onClick={() => navigate("/add-patient")}
+                  >
+                    Adaugă Pacienți
+                  </Button>
+
+                  <SearchIcon sx={{ fontSize: 14, color: "white" }} />
+
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -609,8 +631,8 @@ export default function DoctorDashboard() {
                       border: "none",
                       outline: "none",
                       background: "transparent",
-                      fontSize: 12,
-                      color: C.text,
+                      fontSize: 13,
+                      color: "C.text",
                       width: 130,
                     }}
                   />
@@ -629,6 +651,7 @@ export default function DoctorDashboard() {
                       borderRadius: "8px",
                       height: 32,
                     },
+
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: C.border,
                     },

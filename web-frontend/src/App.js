@@ -25,6 +25,10 @@ import PatientsPage from "./components/doctor/PatientsPage";
 
 import AlarmsPage from "./components/doctor/AlarmsPage";
 
+//Formular pentru adaugat pacienti
+
+import AddPatientForm from "./components/doctor/AddPatientForm";
+
 export default function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -111,6 +115,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/add-patient" element={<AddPatientForm />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
