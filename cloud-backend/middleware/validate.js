@@ -23,7 +23,7 @@ const validateDoctorRegister = [
   body('email').isEmail().withMessage('Email invalid'),
   body('password').isLength({ min: 6 }).withMessage('Parola trebuie să aibă minim 6 caractere'),
   body('firstName').notEmpty().withMessage('Prenumele este obligatoriu'),
-  body('lastName').notEmpty().notEmpty().withMessage('Numele este obligatoriu'),
+  body('lastName').notEmpty().withMessage('Numele este obligatoriu'),
   body('specialization').notEmpty(),
   body('clinicName').notEmpty(),
   handleValidationErrors
