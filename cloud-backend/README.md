@@ -110,7 +110,7 @@ CORS_ORIGIN=http://localhost:3000
 ---
 
 
-# API Documentation
+# API Documentation (SWAGGER UI)
 
 După pornirea serverului:
 
