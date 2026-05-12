@@ -14,6 +14,12 @@ async function registerPatient(req, res, next) {
 
     const { email, password, firstName, lastName, age, weight, height, bloodType} = req.body;
 
+    // Validare input
+    if (!email || !password || !firstName || !lastName) {
+      await transaction.rollback();
+      return res.status(400).json({ error: 'Date incomplete' });
+    }
+
     // Verificare daca emailul exista deja
     const existing = await new sql.Request(transaction)
         .input('email', sql.NVarChar, email)
