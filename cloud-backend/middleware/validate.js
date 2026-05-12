@@ -10,14 +10,6 @@ function handleValidationErrors(req, res, next) {
 }
 
 // Validare register
-const validateRegister = [
-  body('email').isEmail().withMessage('Email invalid'),
-  body('password').isLength({ min: 6 }).withMessage('Parola trebuie să aibă minim 6 caractere'),
-  body('role').isIn(['doctor', 'patient']).withMessage('Rol invalid (doctor/patient)'),
-  body('firstName').notEmpty().withMessage('Prenumele este obligatoriu'),
-  body('lastName').notEmpty().withMessage('Numele este obligatoriu'),
-  handleValidationErrors,
-];
 
 const validateDoctorRegister = [
   body('email').isEmail().withMessage('Email invalid'),
@@ -68,4 +60,4 @@ const validateThresholds = [
   handleValidationErrors,
 ];
 
-module.exports = { validateRegister, validateLogin, validateSensorData, validateThresholds, validateDoctorRegister, validatePatientRegister };
+module.exports = { validateLogin, validateSensorData, validateThresholds, validateDoctorRegister, validatePatientRegister };
