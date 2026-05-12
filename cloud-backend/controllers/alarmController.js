@@ -1,29 +1,46 @@
 const { getPool, sql } = require('../config/db');
 
-// Raportare alarmă nouă (declanșată de aplicația Android)
+// Raportare alarma noua (declanșata de aplicatia Android)
 async function reportAlarm(req, res, next) {
   try {
     const { patientId, type, value, threshold } = req.body;
+
+    if (!patientId || !type || value == null || threshold == null) {
+      return res.status(400).json({ error: 'Date incomplete' });
+    }
+
     const pool = await getPool();
 
-    const result = await pool.request()
-      .input('patientId', sql.Int, patientId)
-      .input('type', sql.NVarChar, type)
-      .input('value', sql.Decimal(10, 2), value)
-      .input('threshold', sql.Decimal(10, 2), threshold)
-      .query(`
-        INSERT INTO alarm_history (patient_id, alarm_type, measured_value, threshold_value)
-        OUTPUT INSERTED.id, INSERTED.triggered_at
-        VALUES (@patientId, @type, @value, @threshold)
-      `);
+    const patient = await pool.request()
+        .input('patientId', sql.Int, patientId)
+        .query('SELECT id FROM patients WHERE id=@patientId');
 
-    res.status(201).json({ success: true, id: result.recordset[0].id });
+    if (!patient.recordset.length) {
+      return res.status(404).json({ error:'Pacient negasit' });
+    }
+
+    const result = await pool.request()
+        .input('patientId', sql.Int, patientId)
+        .input('type', sql.NVarChar, type)
+        .input('value', sql.Decimal(10,2), value)
+        .input('threshold', sql.Decimal(10,2), threshold)
+        .query(`
+          INSERT INTO alarm_history (patient_id, alarm_type, measured_value, threshold_value)
+            OUTPUT INSERTED.id, INSERTED.triggered_at
+          VALUES (@patientId, @type, @value, @threshold)
+        `);
+
+    res.status(201).json({
+      success: true,
+      id: result.recordset[0].id
+    });
+
   } catch (err) {
     next(err);
   }
 }
 
-// Obține pragurile de alarmă pentru un pacient
+// Obtine pragurile de alarma pentru un pacient
 async function getThresholds(req, res, next) {
   try {
     const { patientId } = req.params;
@@ -43,7 +60,7 @@ async function getThresholds(req, res, next) {
   }
 }
 
-// Creare sau actualizare praguri (INSERT dacă nu există, UPDATE dacă există)
+// Creare sau actualizare praguri (INSERT dacă nu exista, UPDATE dacă exista)
 async function upsertThresholds(req, res, next) {
   try {
     const { patientId } = req.params;
@@ -82,31 +99,55 @@ async function upsertThresholds(req, res, next) {
 async function getHistory(req, res, next) {
   try {
     const { patientId } = req.query;
+
+    if (!patientId) {
+      return res.status(400).json({ error: 'patientId obligatoriu' });
+    }
+
     const pool = await getPool();
 
-    const result = await pool.request()
-      .input('patientId', sql.Int, patientId)
-      .query(`
-        SELECT * FROM alarm_history
-        WHERE patient_id = @patientId
-        ORDER BY triggered_at DESC
+    // verificam pacientul
+    const patient = await pool.request()
+        .input('patientId', sql.Int, patientId)
+        .query(`
+        SELECT id
+        FROM patients
+        WHERE id = @patientId
       `);
 
+    if (!patient.recordset.length) {
+      return res.status(404).json({ error: 'Pacient negasit' });
+    }
+
+    const result = await pool.request()
+        .input('patientId', sql.Int, patientId)
+        .query(`
+          SELECT *
+          FROM alarm_history
+          WHERE patient_id = @patientId
+          ORDER BY triggered_at DESC
+        `);
+
     res.json(result.recordset);
+
   } catch (err) {
     next(err);
   }
 }
 
-// Marchează o alarmă ca rezolvată
+// Marcheaza o alarma ca rezolvata
 async function acknowledgeAlarm(req, res, next) {
   try {
     const { id } = req.params;
     const pool = await getPool();
 
-    await pool.request()
+    const result = await pool.request()
       .input('id', sql.Int, id)
       .query('UPDATE alarm_history SET acknowledged = 1 WHERE id = @id');
+
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).json({ error: 'Alarma negasita' });
+    }
 
     res.json({ success: true });
   } catch (err) {
