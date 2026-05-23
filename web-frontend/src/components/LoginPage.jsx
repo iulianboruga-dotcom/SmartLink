@@ -8,7 +8,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../api';
 
 export default function LoginPage() {
@@ -147,7 +147,14 @@ export default function LoginPage() {
             </Button>
           </Box>
 
-          <Typography variant="caption" color="text.secondary" display="block" textAlign="center" mt={2}>
+          <Typography variant="body2" textAlign="center" color="text.secondary" mt={2}>
+            Nu ai cont?{' '}
+            <Link to="/register" style={{ color: 'inherit', fontWeight: 600 }}>
+              Înregistrează-te
+            </Link>
+          </Typography>
+
+          <Typography variant="caption" color="text.secondary" display="block" textAlign="center" mt={1}>
             Demo — Medic: doctor@smartlink.ro / 123456 · Pacient: pacient@smartlink.ro / 123456
           </Typography>
         </CardContent>

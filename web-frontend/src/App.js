@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 // Pagini
 import LoginPage from "./components/LoginPage";
+import RegisterPage from "./components/RegisterPage";
 
 // Medic
 import DoctorDashboard from "./components/doctor/DoctorDashboard";
@@ -37,6 +38,8 @@ export default function App() {
         <Routes>
           {/* Public */}
           <Route path="/" element={<LoginPage />} />
+
+          <Route path="/register" element={<RegisterPage />} />
 
           {/* Medic */}
           <Route
