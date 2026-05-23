@@ -40,11 +40,11 @@ export default function LoginPage() {
   // Pre-completează credențialele demo
   const fillDemo = () => {
     if (role === 'doctor') {
-      setEmail('medic@test.com');
-      setPassword('test123');
+      setEmail('doctor@smartlink.ro');
+      setPassword('123456');
     } else {
-      setEmail('pacient@test.com');
-      setPassword('test123');
+      setEmail('pacient@smartlink.ro');
+      setPassword('123456');
     }
   };
 
@@ -148,7 +148,7 @@ export default function LoginPage() {
           </Box>
 
           <Typography variant="caption" color="text.secondary" display="block" textAlign="center" mt={2}>
-            Demo — Medic: medic@test.com / test123 · Pacient: pacient@test.com / test123
+            Demo — Medic: doctor@smartlink.ro / 123456 · Pacient: pacient@smartlink.ro / 123456
           </Typography>
         </CardContent>
       </Card>
