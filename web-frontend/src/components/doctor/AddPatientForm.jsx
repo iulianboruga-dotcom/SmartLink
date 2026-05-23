@@ -29,7 +29,7 @@ export default function AddPatientForm({ onSubmit }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await fetch("http://localhost:5000/api/patients", {
+    await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3000/api'}/patients`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
