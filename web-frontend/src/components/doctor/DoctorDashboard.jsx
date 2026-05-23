@@ -483,7 +483,7 @@ export default function DoctorDashboard() {
                 lineHeight: 1.2,
               }}
             >
-              Bună ziua, Dr. {user.firstName || ""} {user.lastName || "Andreas"}
+              Bună ziua, Dr. {user.firstName || ""} {user.lastName || ""}
               !
             </Typography>
             <Typography sx={{ fontSize: 13, color: C.muted, mt: 0.3 }}>
