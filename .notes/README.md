@@ -1,4 +1,4 @@
-# .claude/
+# .notes/
 
 Folder pentru fișiere generate de Claude (briefs, audituri, rapoarte execuție).
 Toate fișierele din acest folder sunt gitignored, EXCEPTÂND acest README și .gitignore.
