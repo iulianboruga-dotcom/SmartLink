@@ -286,11 +286,6 @@ export default function DoctorDashboard() {
       icon: <CalendarMonthIcon />,
     },
     { label: "Pacienți", path: "/doctor/patients", icon: <PeopleAltIcon /> },
-    {
-      label: "Alarme",
-      path: "/doctor/alarms",
-      icon: <NotificationsActiveIcon />,
-    },
     { label: "Profil", path: "/doctor/profile", icon: <AccountCircleIcon /> },
   ];
 
