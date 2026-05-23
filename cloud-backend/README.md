@@ -110,12 +110,12 @@ CORS_ORIGIN=http://localhost:3000
 ---
 
 
-# API Documentation
+# API Documentation (SWAGGER UI)
 
 După pornirea serverului:
 
 ```text
-http://localhost:3000/api-docs
+http://localhost:8080/api-docs
 ```
 
 Swagger UI permite:

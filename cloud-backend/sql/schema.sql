@@ -73,7 +73,7 @@ CREATE TABLE ecg_data (
 
 -- 8. Date accelerometru (array JSON)
 CREATE TABLE accelerometer_data (
-    id          INT IDENTITY(1,1) PRIMARY KEY,
+    id          BIGINT IDENTITY(1,1) PRIMARY KEY,
     patient_id  INT           NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
     accel_values      NVARCHAR(MAX) NOT NULL,  -- JSON array de valori
     recorded_at DATETIME2     DEFAULT GETDATE(),

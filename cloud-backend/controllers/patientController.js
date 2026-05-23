@@ -3,16 +3,27 @@ const bcrypt = require('bcrypt');
 
 //POST /api/pacients/register
 async function registerPatient(req, res, next) {
+
+  // Creare conexiune si tranzactie SQL
+  const pool = await getPool();
+  const transaction = new sql.Transaction(pool);
+
   try {
-    const { email, password, firstName, lastName, age, weight, height, bloodType } = req.body;
+    // Pornire tranzactie
+    await transaction.begin();
 
-    const pool = await getPool();
+    const { email, password, firstName, lastName, age, weight, height, bloodType} = req.body;
 
-    const existing = await pool.request()
+    // Verificare daca emailul exista deja
+    const existing = await new sql.Request(transaction)
         .input('email', sql.NVarChar, email)
-        .query('SELECT id FROM users WHERE email = @email');
+        .query(` SELECT id FROM users WHERE email = @email `);
 
+    // Daca emailul exista, se face rollback
     if (existing.recordset.length > 0) {
+
+      await transaction.rollback();
+
       return res.status(409).json({
         error: 'Email deja folosit'
       });
@@ -20,7 +31,8 @@ async function registerPatient(req, res, next) {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
-    const userResult = await pool.request()
+    // Inserare user in tabela users
+    const userResult = await new sql.Request(transaction)
         .input('email', sql.NVarChar, email)
         .input('passwordHash', sql.NVarChar, passwordHash)
         .input('firstName', sql.NVarChar, firstName)
@@ -28,29 +40,38 @@ async function registerPatient(req, res, next) {
         .query(`
         INSERT INTO users (email, password_hash, role, first_name, last_name)
         OUTPUT INSERTED.id, INSERTED.email, INSERTED.first_name, INSERTED.last_name
-        VALUES (@email, @passwordHash, 'patient', @firstName, @lastName)
+        VALUES ( @email, @passwordHash, 'patient',  @firstName,  @lastName
+        )
       `);
 
     const user = userResult.recordset[0];
-
-    const patientResult = await pool.request()
+    // Inserare pacient in tabela patients
+    const patientResult = await new sql.Request(transaction)
         .input('userId', sql.Int, user.id)
         .input('age', sql.Int, age)
         .input('weight', sql.Decimal(5, 2), weight)
         .input('height', sql.Decimal(5, 2), height)
         .input('bloodType', sql.NVarChar, bloodType)
         .query(`
-        INSERT INTO patients (user_id, age, weight, height, blood_type)
+        INSERT INTO patients ( user_id, age, weight, height, blood_type )
         OUTPUT INSERTED.id, INSERTED.age, INSERTED.weight, INSERTED.height, INSERTED.blood_type
-        VALUES (@userId, @age, @weight, @height, @bloodType)
-      `);
+        VALUES ( @userId, @age, @weight, @height, @bloodType ) `);
 
+    // Confirmare tranzactie
+    await transaction.commit();
+
+    // Returnare date create
     res.status(201).json({
       user,
       patient: patientResult.recordset[0]
     });
 
   } catch (err) {
+    // Rollback in caz de eroare
+    if (!transaction._aborted) {
+      await transaction.rollback();
+    }
+
     next(err);
   }
 }
@@ -136,6 +157,7 @@ async function update(req, res, next) {
   }
 }
 
+// Verificare daca asocierea exista deja
 async function assignDoctor(req, res, next) {
   try {
     const { patientId, doctorId } = req.body;
@@ -177,11 +199,13 @@ async function assignDoctor(req, res, next) {
   }
 }
 
+// Eliminare asociere pacient-doctor
 async function unassignDoctor(req, res, next) {
   try {
     const { patientId, doctorId } = req.body;
     const pool = await getPool();
 
+    // Stergere asociere
     const result = await pool.request()
         .input('patientId', sql.Int, patientId)
         .input('doctorId', sql.Int, doctorId)
