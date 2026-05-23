@@ -2,6 +2,41 @@
 -- Parola pentru toți: test123
 -- Hash bcrypt generat cu saltRounds=12
 
+-- ═══════════════════════════════════════════════════════════════════
+-- UTILIZATORI PENTRU TESTELE DE ACCEPTANȚĂ
+-- Parola: 123456 | hash bcrypt saltRounds=12
+-- ═══════════════════════════════════════════════════════════════════
+
+INSERT INTO users (email, password_hash, role, first_name, last_name) VALUES
+('doctor@smartlink.ro',  '$2b$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'doctor',  'Gheorghe', 'Ionescu'),
+('pacient@smartlink.ro', '$2b$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'patient', 'Ana',      'Moldovan');
+
+INSERT INTO doctors (user_id, specialization, clinic_name)
+SELECT id, 'Cardiologie', 'Clinica Sanatatea Noastra'
+FROM users WHERE email = 'doctor@smartlink.ro';
+
+INSERT INTO patients (user_id, age, weight, height, blood_type)
+SELECT id, 35, 65.0, 168.0, 'A+'
+FROM users WHERE email = 'pacient@smartlink.ro';
+
+-- Asociere doctor de test cu pacientul
+INSERT INTO patient_doctor (patient_id, doctor_id)
+SELECT p.id, d.id
+FROM patients p
+JOIN users up ON p.user_id = up.id
+CROSS JOIN doctors d
+JOIN users ud ON d.user_id = ud.id
+WHERE ud.email = 'doctor@smartlink.ro'
+  AND up.email = 'pacient@smartlink.ro';
+
+-- Praguri default pentru pacient
+INSERT INTO alarm_thresholds (patient_id, pulse_min, pulse_max, temp_min, temp_max, hum_min, hum_max)
+SELECT p.id, 50, 120, 35.5, 38.0, 30.0, 70.0
+FROM patients p JOIN users u ON p.user_id = u.id
+WHERE u.email = 'pacient@smartlink.ro';
+
+-- ═══════════════════════════════════════════════════════════════════
+
 -- 1. Utilizatori
 INSERT INTO users (email, password_hash, role, first_name, last_name) VALUES
 ('medic@test.com',     '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4oY.GiWQoS', 'doctor',  'Alexandru', 'Ionescu'),

@@ -2,56 +2,57 @@ const { getPool, sql } = require('../config/db');
 const bcrypt = require('bcrypt');
 
 async function registerDoctor(req, res, next) {
-  // Obtine conexiunea si creaza tranzactia SQL
   const pool = await getPool();
   const transaction = new sql.Transaction(pool);
 
   try {
-    // Start tranzactie
     await transaction.begin();
 
-    const {email, password, firstName, lastName, specialization, clinicName} = req.body;
+    const { email, password, firstName, lastName, specialization, clinicName } = req.body;
 
-    // Verifica daca emailul exista deja
-    const existing = await new sql.Request(transaction)
-        .input('email', sql.NVarChar, email)
-        .query(` SELECT id FROM users WHERE email = @email `);
-
-    // Daca exista deja, face rollback si returneaza eroare
-    if (existing.recordset.length > 0) {
-
+    // VALIDARE INPUT
+    if (!email || !password || !firstName || !lastName) {
       await transaction.rollback();
+      return res.status(400).json({ error: 'Date incomplete' });
+    }
 
-      return res.status(409).json({
-        error: 'Email deja folosit'
-      });
+    // Verificare email
+    const existing = await new sql.Request(transaction)
+      .input('email', sql.NVarChar, email)
+      .query(`SELECT id FROM users WHERE email = @email`);
+
+    if (existing.recordset.length > 0) {
+      await transaction.rollback();
+      return res.status(409).json({ error: 'Email deja folosit' });
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
-    // Inserare user in tabela users
+
+    // INSERT USER
     const userResult = await new sql.Request(transaction)
-        .input('email', sql.NVarChar, email)
-        .input('passwordHash', sql.NVarChar, passwordHash)
-        .input('firstName', sql.NVarChar, firstName)
-        .input('lastName', sql.NVarChar, lastName)
-        .query(`
-        INSERT INTO users ( email, password_hash, role, first_name, last_name )
+      .input('email', sql.NVarChar, email)
+      .input('passwordHash', sql.NVarChar, passwordHash)
+      .input('firstName', sql.NVarChar, firstName)
+      .input('lastName', sql.NVarChar, lastName)
+      .query(`
+        INSERT INTO users (email, password_hash, role, first_name, last_name)
         OUTPUT INSERTED.id, INSERTED.email, INSERTED.first_name, INSERTED.last_name
-        VALUES ( @email, @passwordHash, 'doctor', @firstName, @lastName )`);
+        VALUES (@email, @passwordHash, 'doctor', @firstName, @lastName)
+      `);
 
     const user = userResult.recordset[0];
 
-    // Inserare doctor in tabela doctors
+    // INSERT DOCTOR
     const doctorResult = await new sql.Request(transaction)
-        .input('userId', sql.Int, user.id)
-        .input('specialization', sql.NVarChar, specialization)
-        .input('clinicName', sql.NVarChar, clinicName)
-        .query(`
-        INSERT INTO doctors ( user_id, specialization, clinic_name )
+      .input('userId', sql.Int, user.id)
+      .input('specialization', sql.NVarChar, specialization)
+      .input('clinicName', sql.NVarChar, clinicName)
+      .query(`
+        INSERT INTO doctors (user_id, specialization, clinic_name)
         OUTPUT INSERTED.id, INSERTED.specialization, INSERTED.clinic_name
-        VALUES ( @userId, @specialization, @clinicName )`);
+        VALUES (@userId, @specialization, @clinicName)
+      `);
 
-    // Confirma tranzactia
     await transaction.commit();
 
     res.status(201).json({
@@ -60,10 +61,12 @@ async function registerDoctor(req, res, next) {
     });
 
   } catch (err) {
+    console.error("RegisterDoctor error:", err);
 
-    // Daca apare eroare, se face rollback
-    if (!transaction._aborted) {
+    try {
       await transaction.rollback();
+    } catch (rollbackErr) {
+      // ignorăm dacă deja s-a făcut rollback
     }
 
     next(err);
