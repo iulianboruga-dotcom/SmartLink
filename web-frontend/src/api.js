@@ -16,19 +16,18 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 // ─── Autentificare ───────────────────────────────────────────────────────────
 
 export async function login(email, password) {
-  // TODO: înlocuiește cu fetch real la API
-  // return fetch(`${API_URL}/auth/login`, { method: 'POST', body: JSON.stringify({ email, password }) })
+  const res = await fetch(`${API_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
 
-  await simulateDelay();
-  if (email === 'medic@test.com' && password === 'test123') {
-    const user = mockDoctors[0];
-    return { token: 'mock-token-doctor', user };
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || `Eroare server (${res.status})`);
   }
-  const patient = mockPatients.find((p) => p.email === email);
-  if (patient && password === 'test123') {
-    return { token: `mock-token-patient-${patient.id}`, user: patient };
-  }
-  throw new Error('Email sau parolă incorectă');
+
+  return res.json();
 }
 
 export async function logout() {
