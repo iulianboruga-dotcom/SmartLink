@@ -1,0 +1,4 @@
+# Ignoră tot din acest folder, exceptând fișierul .gitignore însuși
+*
+!.gitignore
+!README.md
