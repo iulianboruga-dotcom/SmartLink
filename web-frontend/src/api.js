@@ -112,10 +112,14 @@ export async function getThresholds(patientId) {
 }
 
 export async function updateThresholds(patientId, thresholds) {
-  // TODO: înlocuiește cu fetch real la API
-  // return fetch(`${API_URL}/alarms/thresholds/${patientId}`, { method: 'PUT', body: JSON.stringify(thresholds), headers: authHeaders() })
-  await simulateDelay();
-  return { ...mockThresholds[patientId], ...thresholds, updatedAt: new Date().toISOString() };
+  // LEGACY: // return fetch(`${API_URL}/alarms/thresholds/${patientId}`, { method: 'PUT', ... })
+  const res = await fetch(`${API_URL}/alarms/thresholds/${patientId}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify(thresholds),
+  });
+  if (!res.ok) throw new Error(`Eroare ${res.status}`);
+  return res.json();
 }
 
 export async function postAlarm(alarm) {
