@@ -39,10 +39,10 @@ export async function logout() {
 // ─── Pacienți ────────────────────────────────────────────────────────────────
 
 export async function getPatients() {
-  // TODO: înlocuiește cu fetch real la API
-  // return fetch(`${API_URL}/patients`, { headers: authHeaders() })
-  await simulateDelay();
-  return mockPatients;
+  // LEGACY: // return fetch(`${API_URL}/patients`, { headers: authHeaders() })
+  const res = await fetch(`${API_URL}/patients`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`Eroare ${res.status}`);
+  return res.json();
 }
 
 export async function getPatientById(patientId) {
