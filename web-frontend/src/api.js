@@ -131,10 +131,10 @@ export async function postAlarm(alarm) {
 // ─── Recomandări ─────────────────────────────────────────────────────────────
 
 export async function getRecommendations(patientId) {
-  // TODO: înlocuiește cu fetch real la API
-  // return fetch(`${API_URL}/recommendations?patientId=${patientId}`, { headers: authHeaders() })
-  await simulateDelay();
-  return mockRecommendations[patientId] || [];
+  // LEGACY: // return fetch(`${API_URL}/recommendations?patientId=...` (path greșit — backend folosește /:patientId)
+  const res = await fetch(`${API_URL}/recommendations/${patientId}`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`Eroare ${res.status}`);
+  return res.json();
 }
 
 export async function createRecommendation(recommendation) {
