@@ -46,12 +46,10 @@ export async function getPatients() {
 }
 
 export async function getPatientById(patientId) {
-  // TODO: înlocuiește cu fetch real la API
-  // return fetch(`${API_URL}/patients/${patientId}`, { headers: authHeaders() })
-  await simulateDelay();
-  const patient = mockPatients.find((p) => p.id === patientId);
-  if (!patient) throw new Error('Pacientul nu a fost găsit');
-  return patient;
+  // LEGACY: // return fetch(`${API_URL}/patients/${patientId}`, { headers: authHeaders() })
+  const res = await fetch(`${API_URL}/patients/${patientId}`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`Eroare ${res.status}`);
+  return res.json();
 }
 
 export async function updatePatient(patientId, data) {
