@@ -13,6 +13,20 @@ import {
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
+function toCamelCase(s) {
+  return s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+}
+
+function snakeToCamel(obj) {
+  if (obj === null || obj === undefined) return obj;
+  if (Array.isArray(obj)) return obj.map(snakeToCamel);
+  if (typeof obj !== 'object') return obj;
+  if (obj instanceof Date) return obj;
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v]) => [toCamelCase(k), snakeToCamel(v)])
+  );
+}
+
 // ─── Autentificare ───────────────────────────────────────────────────────────
 
 export async function login(email, password) {
@@ -27,7 +41,7 @@ export async function login(email, password) {
     throw new Error(data.error || `Eroare server (${res.status})`);
   }
 
-  return res.json();
+  return snakeToCamel(await res.json());
 }
 
 export async function logout() {
@@ -42,14 +56,14 @@ export async function getPatients() {
   // LEGACY: // return fetch(`${API_URL}/patients`, { headers: authHeaders() })
   const res = await fetch(`${API_URL}/patients`, { headers: authHeaders() });
   if (!res.ok) throw new Error(`Eroare ${res.status}`);
-  return res.json();
+  return snakeToCamel(await res.json());
 }
 
 export async function getPatientById(patientId) {
   // LEGACY: // return fetch(`${API_URL}/patients/${patientId}`, { headers: authHeaders() })
   const res = await fetch(`${API_URL}/patients/${patientId}`, { headers: authHeaders() });
   if (!res.ok) throw new Error(`Eroare ${res.status}`);
-  return res.json();
+  return snakeToCamel(await res.json());
 }
 
 export async function updatePatient(patientId, data) {
@@ -67,7 +81,7 @@ export async function getSensorHistory(patientId, startDate, endDate) {
   if (endDate) params.append('endDate', endDate);
   const res = await fetch(`${API_URL}/sensors/history?${params}`, { headers: authHeaders() });
   if (!res.ok) throw new Error(`Eroare ${res.status}`);
-  return res.json();
+  return snakeToCamel(await res.json());
 }
 
 export async function getLatestSensorReading(patientId) {
@@ -89,7 +103,7 @@ export async function getAlarms(patientId) {
   // LEGACY: // return fetch(`${API_URL}/alarms?patientId=...` (path greșit — backend folosește /alarms/history)
   const res = await fetch(`${API_URL}/alarms/history?patientId=${patientId}`, { headers: authHeaders() });
   if (!res.ok) throw new Error(`Eroare ${res.status}`);
-  return res.json();
+  return snakeToCamel(await res.json());
 }
 
 export async function getAllAlarms() {
@@ -108,7 +122,7 @@ export async function getThresholds(patientId) {
   // LEGACY: // return fetch(`${API_URL}/alarms/thresholds/${patientId}`, { headers: authHeaders() })
   const res = await fetch(`${API_URL}/alarms/thresholds/${patientId}`, { headers: authHeaders() });
   if (!res.ok) throw new Error(`Eroare ${res.status}`);
-  return res.json();
+  return snakeToCamel(await res.json());
 }
 
 export async function updateThresholds(patientId, thresholds) {
@@ -119,7 +133,7 @@ export async function updateThresholds(patientId, thresholds) {
     body: JSON.stringify(thresholds),
   });
   if (!res.ok) throw new Error(`Eroare ${res.status}`);
-  return res.json();
+  return snakeToCamel(await res.json());
 }
 
 export async function postAlarm(alarm) {
@@ -134,7 +148,7 @@ export async function getRecommendations(patientId) {
   // LEGACY: // return fetch(`${API_URL}/recommendations?patientId=...` (path greșit — backend folosește /:patientId)
   const res = await fetch(`${API_URL}/recommendations/${patientId}`, { headers: authHeaders() });
   if (!res.ok) throw new Error(`Eroare ${res.status}`);
-  return res.json();
+  return snakeToCamel(await res.json());
 }
 
 export async function createRecommendation(recommendation) {
