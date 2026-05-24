@@ -86,10 +86,10 @@ export async function getECGData(patientId) {
 // ─── Alarme ──────────────────────────────────────────────────────────────────
 
 export async function getAlarms(patientId) {
-  // TODO: înlocuiește cu fetch real la API
-  // return fetch(`${API_URL}/alarms?patientId=${patientId}`, { headers: authHeaders() })
-  await simulateDelay();
-  return mockAlarms[patientId] || [];
+  // LEGACY: // return fetch(`${API_URL}/alarms?patientId=...` (path greșit — backend folosește /alarms/history)
+  const res = await fetch(`${API_URL}/alarms/history?patientId=${patientId}`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`Eroare ${res.status}`);
+  return res.json();
 }
 
 export async function getAllAlarms() {
