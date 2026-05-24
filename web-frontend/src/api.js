@@ -61,13 +61,13 @@ export async function updatePatient(patientId, data) {
 // ─── Date senzori ────────────────────────────────────────────────────────────
 
 export async function getSensorHistory(patientId, startDate, endDate) {
-  // TODO: înlocuiește cu fetch real la API
-  // return fetch(`${API_URL}/sensors?patientId=${patientId}&startDate=${startDate}&endDate=${endDate}`, { headers: authHeaders() })
-  await simulateDelay();
-  let data = mockSensorData[patientId] || [];
-  if (startDate) data = data.filter((r) => new Date(r.recordedAt) >= new Date(startDate));
-  if (endDate) data = data.filter((r) => new Date(r.recordedAt) <= new Date(endDate));
-  return data;
+  // LEGACY: // return fetch(`${API_URL}/sensors?patientId=...` (path greșit — backend folosește /sensors/history)
+  const params = new URLSearchParams({ patientId });
+  if (startDate) params.append('startDate', startDate);
+  if (endDate) params.append('endDate', endDate);
+  const res = await fetch(`${API_URL}/sensors/history?${params}`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`Eroare ${res.status}`);
+  return res.json();
 }
 
 export async function getLatestSensorReading(patientId) {
