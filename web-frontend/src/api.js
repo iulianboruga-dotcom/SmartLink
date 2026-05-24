@@ -105,10 +105,10 @@ export async function acknowledgeAlarm(alarmId) {
 }
 
 export async function getThresholds(patientId) {
-  // TODO: înlocuiește cu fetch real la API
-  // return fetch(`${API_URL}/alarms/thresholds/${patientId}`, { headers: authHeaders() })
-  await simulateDelay();
-  return mockThresholds[patientId] || null;
+  // LEGACY: // return fetch(`${API_URL}/alarms/thresholds/${patientId}`, { headers: authHeaders() })
+  const res = await fetch(`${API_URL}/alarms/thresholds/${patientId}`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`Eroare ${res.status}`);
+  return res.json();
 }
 
 export async function updateThresholds(patientId, thresholds) {
