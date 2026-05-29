@@ -155,3 +155,13 @@ FROM doctors d JOIN users u ON d.user_id = u.id WHERE u.email = 'medic@test.com'
 INSERT INTO recommendations (patient_id, doctor_id, reco_text, priority, created_at)
 SELECT @p3, d.id, 'Evitați efortul fizic intens în perioadele de temperaturi extreme.', 'medium', DATEADD(DAY, -1, GETDATE())
 FROM doctors d JOIN users u ON d.user_id = u.id WHERE u.email = 'medic@test.com';
+
+-- ═══════════════════════════════════════════════════════════════════
+-- DATE ECG — ritm sinusal Ana Moldovan (patient_id=10)
+-- 100 valori ADC 12-bit simulate la 100Hz (~1 secundă de semnal)
+-- ═══════════════════════════════════════════════════════════════════
+INSERT INTO ecg_data (patient_id, ecg_values, recorded_at)
+SELECT p.id,
+  '[507,627,691,648,531,473,448,457,504,505,504,506,510,511,520,504,510,517,511,518,512,504,509,517,514,512,508,510,514,507,506,516,507,515,519,522,520,537,530,542,534,542,544,538,532,528,530,528,516,515,507,516,512,518,515,509,515,515,510,512,506,509,511,509,518,516,512,511,514,505,511,505,514,516,512,506,510,514,510,519,516,518,508,512,631,690,649,537,481,456,462,495,520,519,506,505,507,508,509,517]',
+  DATEADD(HOUR, -1, GETDATE())
+FROM patients p JOIN users u ON p.user_id = u.id WHERE u.email = 'pacient@smartlink.ro';

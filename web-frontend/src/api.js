@@ -92,9 +92,9 @@ export async function getLatestSensorReading(patientId) {
 }
 
 export async function getECGData(patientId) {
-  // TODO: înlocuiește cu fetch real la API
-  await simulateDelay();
-  return mockECGData[patientId] || [];
+  const res = await fetch(`${API_URL}/sensors/ecg?patientId=${patientId}`, { headers: authHeaders() });
+  if (!res.ok) return [];
+  return snakeToCamel(await res.json());
 }
 
 // ─── Alarme ──────────────────────────────────────────────────────────────────

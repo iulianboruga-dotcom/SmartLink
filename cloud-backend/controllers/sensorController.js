@@ -102,6 +102,35 @@ async function receiveECG(req, res, next) {
   }
 }
 
+// Citire istoric ECG pentru un pacient
+async function getECGHistory(req, res, next) {
+  try {
+    const { patientId } = req.query;
+    if (!patientId) return res.status(400).json({ error: 'patientId obligatoriu' });
+
+    const pool = await getPool();
+    if (!(await patientExists(pool, patientId))) {
+      return res.status(404).json({ error: 'Pacient negasit' });
+    }
+
+    const result = await pool.request()
+      .input('patientId', sql.Int, patientId)
+      .query(`
+        SELECT TOP 1 ecg_values, recorded_at
+        FROM ecg_data
+        WHERE patient_id = @patientId
+        ORDER BY recorded_at DESC
+      `);
+
+    if (result.recordset.length === 0) return res.json([]);
+
+    const values = JSON.parse(result.recordset[0].ecg_values);
+    res.json(values.map((v, i) => ({ index: i, value: v })));
+  } catch (err) {
+    next(err);
+  }
+}
+
 // Primire date accelerometru (array de valori)
 async function receiveAccelerometer(req, res, next) {
   try {
@@ -186,4 +215,4 @@ async function getHistory(req, res, next) {
   }
 }
 
-module.exports = { receiveSensorData, receiveECG, receiveAccelerometer, getHistory };
+module.exports = { receiveSensorData, receiveECG, receiveAccelerometer, getHistory, getECGHistory };
