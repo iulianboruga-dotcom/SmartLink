@@ -29,9 +29,26 @@ async function login(req, res, next) {
       { expiresIn: '24h' }
     );
 
-    // Returnează userul fara parola
+    // Include patient_id sau doctor_id în răspuns pentru mobile app
+    let profileId = null;
+    if (user.role === 'patient') {
+      const pr = await pool.request()
+        .input('uid', sql.Int, user.id)
+        .query('SELECT id FROM patients WHERE user_id = @uid');
+      if (pr.recordset.length > 0) profileId = pr.recordset[0].id;
+    } else if (user.role === 'doctor') {
+      const dr = await pool.request()
+        .input('uid', sql.Int, user.id)
+        .query('SELECT id FROM doctors WHERE user_id = @uid');
+      if (dr.recordset.length > 0) profileId = dr.recordset[0].id;
+    }
+
     const { password_hash, ...userWithoutPassword } = user;
-    res.json({ token, user: userWithoutPassword });
+    const profileKey = user.role === 'patient' ? 'patient_id' : user.role === 'doctor' ? 'doctor_id' : null;
+    res.json({
+      token,
+      user: { ...userWithoutPassword, ...(profileKey ? { [profileKey]: profileId } : {}) }
+    });
   } catch (err) {
     next(err);
   }
