@@ -52,8 +52,8 @@
                     android:id="@+id/etUsername"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Utilizator"
-                    android:inputType="text"
+                    android:hint="Email"
+                    android:inputType="textEmailAddress"
                     android:textColor="#FFFFFF"
                     android:textColorHint="#555555"
                     android:background="#1A1A1A"
@@ -64,29 +64,56 @@
                     android:id="@+id/etPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Parola"
+                    android:hint="Parolă"
                     android:inputType="textPassword"
                     android:textColor="#FFFFFF"
                     android:textColorHint="#555555"
                     android:background="#1A1A1A"
                     android:padding="10dp"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Demo credentials fill button -->
+                <Button
+                    android:id="@+id/btnDemoFill"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text="▶  Completare automată Demo"
+                    android:backgroundTint="#0D2B0D"
+                    android:textColor="#00CC44"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp" />
 
                 <Button
                     android:id="@+id/btnLogin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Intra / Creeaza cont"
+                    android:text="Conectare"
                     android:backgroundTint="#1B5E20"
-                    android:textColor="#FFFFFF" />
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp" />
+
+                <ProgressBar
+                    android:id="@+id/progressLogin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone" />
 
                 <TextView
+                    android:id="@+id/tvLoginStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Prima autentificare cu un utilizator nou creeaza contul automat."
-                    android:textColor="#444444"
-                    android:textSize="10sp"
-                    android:paddingTop="8dp" />
+                    android:text=""
+                    android:textColor="#888888"
+                    android:textSize="11sp"
+                    android:gravity="center"
+                    android:paddingTop="6dp"
+                    android:visibility="gone" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

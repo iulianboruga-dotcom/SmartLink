@@ -51,11 +51,12 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.example.smartlink_multi.data.prefs.SessionManager
 
 class SettingsFragment : Fragment() {
 
-    // Shared ViewModel
     private val vm: BleViewModel by activityViewModels()
+    private val sessionVM: SessionViewModel by activityViewModels()
 
     // Handler for the 1-second session duration tick
     private val tickHandler = Handler(Looper.getMainLooper())
@@ -94,67 +95,91 @@ class SettingsFragment : Fragment() {
         // MODE_PRIVATE means only this app can read/write these values.
         val prefs = requireContext().getSharedPreferences("smartlink_prefs", Context.MODE_PRIVATE)
 
-        // ========== SECTION 1: LOCAL LOGIN ==========
+        // ========== SECTION 1: LOGIN BACKEND REAL ==========
 
-        val etUser    = view.findViewById<EditText>(R.id.etUsername)
-        val etPass    = view.findViewById<EditText>(R.id.etPassword)
-        val btnLogin  = view.findViewById<Button>(R.id.btnLogin)
-        val btnLogout = view.findViewById<Button>(R.id.btnLogout)
-        loginCard     = view.findViewById(R.id.loginCard)
-        profileCard   = view.findViewById(R.id.profileCard)
-        tvLoggedInAs  = view.findViewById(R.id.tvLoggedInAs)
+        val etUser      = view.findViewById<EditText>(R.id.etUsername)
+        val etPass      = view.findViewById<EditText>(R.id.etPassword)
+        val btnLogin    = view.findViewById<Button>(R.id.btnLogin)
+        val btnLogout   = view.findViewById<Button>(R.id.btnLogout)
+        val btnDemo     = view.findViewById<Button>(R.id.btnDemoFill)
+        val progressLogin = view.findViewById<ProgressBar>(R.id.progressLogin)
+        val tvLoginStatus = view.findViewById<TextView>(R.id.tvLoginStatus)
+        loginCard       = view.findViewById(R.id.loginCard)
+        profileCard     = view.findViewById(R.id.profileCard)
+        tvLoggedInAs    = view.findViewById(R.id.tvLoggedInAs)
 
-        /**
-         * Refreshes the login UI based on the currently stored "logged_user" pref.
-         * If a user is logged in: show the profile card with their name.
-         * If not: show the login form.
-         */
-        fun refreshLogin() {
-            val user = prefs.getString("logged_user", null)
-            if (user != null) {
-                loginCard.visibility   = View.GONE
-                profileCard.visibility = View.VISIBLE
-                tvLoggedInAs.text      = user
-            } else {
-                loginCard.visibility   = View.VISIBLE
-                profileCard.visibility = View.GONE
+        val session = SessionManager(requireContext())
+
+        fun showLoggedIn(displayName: String) {
+            loginCard.visibility   = View.GONE
+            profileCard.visibility = View.VISIBLE
+            tvLoggedInAs.text      = displayName
+        }
+
+        fun showLoggedOut() {
+            loginCard.visibility   = View.VISIBLE
+            profileCard.visibility = View.GONE
+            progressLogin.visibility = View.GONE
+            tvLoginStatus.visibility = View.GONE
+            btnLogin.isEnabled = true
+            btnDemo.isEnabled  = true
+        }
+
+        // Stare inițială — dacă sesiunea e salvată, arată direct profilul
+        if (session.isLoggedIn()) {
+            showLoggedIn(session.getDisplayName())
+        } else {
+            showLoggedOut()
+        }
+
+        // Buton demo: completează automat credențialele pacientului demo
+        // TODO: șterge pre-fill înainte de release
+        btnDemo.setOnClickListener {
+            etUser.setText("pacient@smartlink.ro")
+            etPass.setText("123456")
+        }
+
+        // Observă starea de login din SessionViewModel (scope activity)
+        sessionVM.loginState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is LoginState.Loading -> {
+                    progressLogin.visibility = View.VISIBLE
+                    tvLoginStatus.visibility = View.VISIBLE
+                    tvLoginStatus.text = "Conectare… (poate dura până la 2 min, cold start)"
+                    btnLogin.isEnabled = false
+                    btnDemo.isEnabled  = false
+                }
+                is LoginState.Success -> {
+                    progressLogin.visibility = View.GONE
+                    tvLoginStatus.visibility = View.GONE
+                    showLoggedIn("${state.user.firstName} ${state.user.lastName}")
+                    etUser.text.clear()
+                    etPass.text.clear()
+                }
+                is LoginState.Error -> {
+                    progressLogin.visibility = View.GONE
+                    tvLoginStatus.visibility = View.GONE
+                    btnLogin.isEnabled = true
+                    btnDemo.isEnabled  = true
+                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                }
+                else -> { /* Idle — nimic */ }
             }
         }
-        refreshLogin()
 
         btnLogin.setOnClickListener {
-            val user = etUser.text.toString().trim()
-            val pass = etPass.text.toString()
-            if (user.isEmpty() || pass.isEmpty()) {
-                Toast.makeText(requireContext(), "Completati toate campurile", Toast.LENGTH_SHORT).show()
+            val email = etUser.text.toString().trim()
+            val pass  = etPass.text.toString()
+            if (email.isEmpty() || pass.length < 6) {
+                Toast.makeText(requireContext(), "Email și parolă (min. 6 caractere)", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val saved = prefs.getString("pass_$user", null)
-            when {
-                // New user — auto-register and log in
-                saved == null -> {
-                    prefs.edit().putString("pass_$user", pass).putString("logged_user", user).apply()
-                    Toast.makeText(requireContext(), "Cont creat — bun venit, $user!", Toast.LENGTH_SHORT).show()
-                }
-                // Existing user, correct password — log in
-                saved == pass -> {
-                    prefs.edit().putString("logged_user", user).apply()
-                    Toast.makeText(requireContext(), "Bun venit, $user!", Toast.LENGTH_SHORT).show()
-                }
-                // Wrong password — reject without any state change
-                else -> {
-                    Toast.makeText(requireContext(), "Parola incorecta!", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-            }
-            etUser.text.clear(); etPass.text.clear()
-            refreshLogin()
+            sessionVM.login(email, pass)
         }
 
         btnLogout.setOnClickListener {
-            // Remove the logged_user key — credentials remain stored for next login
-            prefs.edit().remove("logged_user").apply()
-            refreshLogin()
+            sessionVM.logout()
+            showLoggedOut()
         }
 
         // ========== SECTION 2: SESSION STATISTICS ==========
