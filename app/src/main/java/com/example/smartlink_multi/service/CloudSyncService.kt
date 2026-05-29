@@ -4,10 +4,12 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import com.example.smartlink_multi.R
 import com.example.smartlink_multi.data.SensorBuffer
 import com.example.smartlink_multi.data.network.ApiClient
@@ -29,7 +31,13 @@ class CloudSyncService : Service() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-        startForeground(NOTIF_ID, buildNotification())
+        // ServiceCompat gestionează corect tipul pe toate versiunile (API 26–34+)
+        ServiceCompat.startForeground(
+            this, NOTIF_ID, buildNotification(),
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            else 0
+        )
         repo = SensorRepository(ApiClient.create(SessionManager(this)))
         startSyncLoop()
     }
