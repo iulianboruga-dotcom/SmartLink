@@ -45,6 +45,10 @@ import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.example.smartlink_multi.data.SensorBuffer
+import com.example.smartlink_multi.data.network.dto.SensorDataDto
+import com.example.smartlink_multi.data.prefs.SessionManager
+import com.example.smartlink_multi.service.CloudSyncService
 import org.json.JSONObject
 import java.util.*
 
@@ -119,6 +123,11 @@ class MainActivity : AppCompatActivity() {
         // Obtain the system Bluetooth adapter. Will be null on devices without BT hardware.
         val btManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothAdapter = btManager.adapter
+
+        // Repornire cloud sync dacă sesiunea e deja activă (app ucisă și redeschisă)
+        if (SessionManager(this).isLoggedIn()) {
+            startForegroundService(android.content.Intent(this, CloudSyncService::class.java))
+        }
     }
 
     override fun onDestroy() {
@@ -429,6 +438,11 @@ class MainActivity : AppCompatActivity() {
                     val pulse = if (json.has("bpm"))  json.getInt("bpm")               else null
                     handler.post { viewModel.onStatus(lo, rate, temp, hum, pulse) }
                     viewModel.addLog("Status: ${rate}Hz lo=$lo temp=$temp hum=$hum bpm=$pulse")
+                    // Cloud sync hook — adaugă în buffer dacă e logat și toate valorile sunt disponibile
+                    val pid = SessionManager(applicationContext).getPatientId()
+                    if (pid != -1 && pulse != null && temp != null && hum != null) {
+                        SensorBuffer.add(SensorDataDto(pid, pulse, temp, hum))
+                    }
                 } catch (e: Exception) {
                     // Malformed JSON — log and ignore. This can happen if BLE packets
                     // are fragmented and reassembly is incomplete.

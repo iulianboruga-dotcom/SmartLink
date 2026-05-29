@@ -14,11 +14,8 @@ interface ApiService {
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
-    @POST("sensors/data")
+    @POST("sensors")
     suspend fun postSensorData(@Body data: SensorDataDto): Response<Unit>
-
-    @POST("sensors/data")
-    suspend fun postSensorDataBatch(@Body data: List<SensorDataDto>): Response<Unit>
 
     @GET("alarms/history")
     suspend fun getAlarmsHistory(@Query("patientId") patientId: Int): Response<List<AlarmDto>>

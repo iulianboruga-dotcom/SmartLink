@@ -42,6 +42,7 @@ package com.example.smartlink_multi
  */
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -52,6 +53,7 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.smartlink_multi.data.prefs.SessionManager
+import com.example.smartlink_multi.service.CloudSyncService
 
 class SettingsFragment : Fragment() {
 
@@ -155,6 +157,9 @@ class SettingsFragment : Fragment() {
                     showLoggedIn("${state.user.firstName} ${state.user.lastName}")
                     etUser.text.clear()
                     etPass.text.clear()
+                    requireContext().startForegroundService(
+                        Intent(requireContext(), CloudSyncService::class.java)
+                    )
                 }
                 is LoginState.Error -> {
                     progressLogin.visibility = View.GONE
@@ -179,6 +184,7 @@ class SettingsFragment : Fragment() {
 
         btnLogout.setOnClickListener {
             sessionVM.logout()
+            requireContext().stopService(Intent(requireContext(), CloudSyncService::class.java))
             showLoggedOut()
         }
 
