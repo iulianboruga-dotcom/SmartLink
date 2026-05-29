@@ -1,0 +1,25 @@
+package com.example.smartlink_multi.data.network
+
+import com.example.smartlink_multi.data.network.dto.AlarmDto
+import com.example.smartlink_multi.data.network.dto.LoginRequest
+import com.example.smartlink_multi.data.network.dto.LoginResponse
+import com.example.smartlink_multi.data.network.dto.SensorDataDto
+import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Query
+
+interface ApiService {
+    @POST("auth/login")
+    suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+
+    @POST("sensors/data")
+    suspend fun postSensorData(@Body data: SensorDataDto): Response<Unit>
+
+    @POST("sensors/data")
+    suspend fun postSensorDataBatch(@Body data: List<SensorDataDto>): Response<Unit>
+
+    @GET("alarms/history")
+    suspend fun getAlarmsHistory(@Query("patientId") patientId: Int): Response<List<AlarmDto>>
+}
