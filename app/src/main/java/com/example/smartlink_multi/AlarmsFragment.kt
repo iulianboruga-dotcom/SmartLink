@@ -153,8 +153,8 @@ private class AlarmAdapter : ListAdapter<AlarmDto, AlarmAdapter.VH>(DIFF) {
 
     companion object {
         private val DIFF = object : DiffUtil.ItemCallback<AlarmDto>() {
-            override fun areItemsSame(a: AlarmDto, b: AlarmDto) = a.id == b.id
-            override fun areContentsSame(a: AlarmDto, b: AlarmDto) = a == b
+            override fun areItemsTheSame(a: AlarmDto, b: AlarmDto) = a.id == b.id
+            override fun areContentsTheSame(a: AlarmDto, b: AlarmDto) = a == b
         }
     }
 }
