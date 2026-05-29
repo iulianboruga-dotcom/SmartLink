@@ -23,17 +23,12 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 
 class ViewPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
 
-    /** Total number of tabs / pages. */
-    override fun getItemCount() = 3
+    override fun getItemCount() = 4
 
-    /**
-     * Creates and returns the Fragment for the given tab position.
-     * Called lazily by ViewPager2 — each Fragment is instantiated only once
-     * and then managed by the FragmentStateAdapter lifecycle.
-     */
     override fun createFragment(position: Int): Fragment = when (position) {
         0    -> EcgFragment()      // Tab: "ECG"
         1    -> SensorsFragment()  // Tab: "Senzori"
-        else -> SettingsFragment() // Tab: "Setari"
+        2    -> AlarmsFragment()   // Tab: "Alarme"
+        else -> SettingsFragment() // Tab: "Setări"
     }
 }

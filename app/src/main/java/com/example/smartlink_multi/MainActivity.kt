@@ -114,10 +114,10 @@ class MainActivity : AppCompatActivity() {
         val pager = findViewById<ViewPager2>(R.id.viewPager)
         val tabs  = findViewById<TabLayout>(R.id.tabLayout)
         pager.adapter = ViewPagerAdapter(this)
-        pager.offscreenPageLimit = 2
+        pager.offscreenPageLimit = 3
 
         TabLayoutMediator(tabs, pager) { tab, pos ->
-            tab.text = when (pos) { 0 -> "ECG"; 1 -> "Senzori"; else -> "Setari" }
+            tab.text = when (pos) { 0 -> "ECG"; 1 -> "Senzori"; 2 -> "Alarme"; else -> "Setări" }
         }.attach()
 
         // Obtain the system Bluetooth adapter. Will be null on devices without BT hardware.

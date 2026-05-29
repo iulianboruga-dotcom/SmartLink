@@ -7,6 +7,6 @@ data class AlarmDto(
     @SerializedName("alarm_type") val alarmType: String,
     @SerializedName("measured_value") val measuredValue: Float,
     @SerializedName("threshold_value") val thresholdValue: Float,
-    @SerializedName("created_at") val createdAt: String,
+    @SerializedName("triggered_at") val triggeredAt: String,
     val acknowledged: Boolean
 )
