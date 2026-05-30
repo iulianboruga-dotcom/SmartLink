@@ -27,3 +27,24 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 For more on this, please refer to https://docs.gradle.org/8.13/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
 BUILD FAILED in 24s
+
+═══════════════════════════════════════════════════════
+CAUZA: Gradle 8.13 necesită Java 11+. PowerShell folosea Java 8 din JAVA_HOME sistem.
+
+FIX RAPID — rulează în PowerShell înainte de gradlew:
+
+    $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+    .\gradlew assembleDebug
+
+Dacă calea nu există, găsește JDK-ul Android Studio:
+
+    Get-ChildItem "C:\Program Files\Android\Android Studio\" -Directory | Where-Object {$_.Name -like "jbr*"}
+
+FIX PERMANENT — creează fișierul local.properties în rădăcina proiectului
+(este gitignored, nu se commitează):
+
+    org.gradle.java.home=C:\\Program Files\\Android\\Android Studio\\jbr
+
+ALTERNATIVĂ — build direct din Android Studio (Build → Make Project)
+care folosește automat JDK-ul embedded fără să depindă de JAVA_HOME sistem.
+═══════════════════════════════════════════════════════
