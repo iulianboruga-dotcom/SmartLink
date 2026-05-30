@@ -41,6 +41,7 @@
 #include <BLEUtils.h>
 #include <BLE2902.h>
 #include "DHT.h"    // Adafruit DHT sensor library
+#include <Wire.h>   // I2C — pentru detecție automată senzor de puls
 
 // ===================== PIN DEFINITIONS =====================
 
@@ -63,6 +64,57 @@
 // Built-in LED — flashes on each detected heartbeat for visual feedback.
 // On most ESP32 boards, the built-in LED is on GPIO2.
 #define LED_PIN  2
+
+// ===================== SENZOR DE PULS (opțional, I2C) =====================
+// Dacă e montat un senzor de puls I2C (ex. MAX30102), BPM-ul vine de la el.
+// Dacă NU e montat, BPM-ul vine din detecția R-peak pe semnalul ECG (AD8232).
+// Detecție automată la boot prin scan I2C — nu trebuie schimbat nimic manual.
+//
+// ADRESA I2C — Paul: schimb-o dacă senzorul tău are altă adresă.
+//   MAX30102 (SparkFun, DFRobot Gravity) = 0x57
+//   Verifică în datasheet sau rulează un scanner I2C dacă nu știi.
+#define PULSE_I2C_ADDR  0x57
+
+bool g_hasPulseSensor = false;  // setat automat în setup()
+int  g_lastValidBpm   = 0;      // ultima valoare BPM validă (pentru continuitate)
+
+// Scanează adresa I2C — returnează true dacă senzorul răspunde.
+bool detectPulseSensor() {
+  Wire.beginTransmission(PULSE_I2C_ADDR);
+  return (Wire.endTransmission() == 0);  // 0 = ACK = senzor prezent
+}
+
+// ===================== CITIRE SENZOR PULS (DE COMPLETAT DE PAUL) =====================
+// Returnează BPM-ul de la senzorul de puls, sau 0 dacă nu are valoare validă încă
+// (senzorul tocmai a pornit, degetul nu e pe senzor etc.).
+//
+// PAUL: înlocuiește conținutul cu citirea senzorului TĂU concret.
+//
+// Exemplu pentru MAX30102 cu biblioteca SparkFun MAX3010x:
+//   #include "MAX30105.h"
+//   #include "heartRate.h"
+//   MAX30105 particleSensor;   // global
+//   // în setup() (condiționat de g_hasPulseSensor):
+//   //   particleSensor.begin(Wire, I2C_SPEED_FAST);
+//   //   particleSensor.setup();
+//   // în readPulseSensorBpm():
+//   //   long ir = particleSensor.getIR();
+//   //   if (ir < 50000) return 0;  // niciun deget
+//   //   if (checkForBeat(ir)) {
+//   //     static long lastBeat = 0;
+//   //     long now = millis();
+//   //     int bpm = 60000 / (now - lastBeat);
+//   //     lastBeat = now;
+//   //     if (bpm > 30 && bpm < 220) return bpm;
+//   //   }
+//   //   return 0;
+//
+// Dacă senzorul tău dă BPM gata calculat (ex. unele module DFRobot cu MCU integrat):
+//   return citesteBpmDinRegistru();  // o singură linie
+int readPulseSensorBpm() {
+  // TODO Paul: completează cu citirea senzorului tău.
+  return 0;
+}
 
 // ===================== BLE UUIDs =====================
 // These must match exactly what the Android app expects.
@@ -215,6 +267,16 @@ void setup() {
   // Configure ADC: 12-bit resolution (0–4095), full 3.3V range (11dB attenuation)
   analogReadResolution(12);
   analogSetAttenuation(ADC_11db);
+
+  // Inițializare I2C + detecție automată senzor de puls
+  Wire.begin();
+  g_hasPulseSensor = detectPulseSensor();
+  if (g_hasPulseSensor) {
+    Serial.println("[OK] Senzor puls I2C detectat la adresa 0x" + String(PULSE_I2C_ADDR, HEX) + " — BPM de la senzor");
+    // PAUL: dacă senzorul tău cere init (ex. particleSensor.begin/setup), pune-l AICI
+  } else {
+    Serial.println("[INFO] Niciun senzor puls I2C — BPM calculat din semnalul ECG (fallback)");
+  }
 
   // Initialize DHT22.
   // IMPORTANT: Do NOT read DHT22 here in setup().
@@ -382,8 +444,21 @@ void loop() {
       snprintf(hbuf, sizeof(hbuf), "%.1f", currentHum);
       status += String(",\"hum\":") + hbuf;
     }
-    if (currentBpm > 0) {
-      status += String(",\"bpm\":") + String(currentBpm);
+    // --- Selectează sursa BPM ---
+    // Dacă senzorul de puls I2C e prezent, îl folosim pe el.
+    // Altfel, folosim BPM-ul estimat din detecția R-peak pe semnalul ECG.
+    // g_lastValidBpm păstrează ultima valoare bună — evită salturi la 0.
+    int bpmToSend;
+    if (g_hasPulseSensor) {
+      int s = readPulseSensorBpm();
+      bpmToSend = (s > 0) ? s : g_lastValidBpm;
+    } else {
+      bpmToSend = currentBpm;
+    }
+    if (bpmToSend > 0) g_lastValidBpm = bpmToSend;
+
+    if (bpmToSend > 0) {
+      status += String(",\"bpm\":") + String(bpmToSend);
     }
 
     status += "}";
