@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.example.smartlink_multi.R
+import com.example.smartlink_multi.data.EcgBuffer
 import com.example.smartlink_multi.data.SensorBuffer
 import com.example.smartlink_multi.data.network.ApiClient
 import com.example.smartlink_multi.data.prefs.SessionManager
@@ -40,6 +41,7 @@ class CloudSyncService : Service() {
         )
         repo = SensorRepository(ApiClient.create(SessionManager(this)))
         startSyncLoop()
+        startEcgUploadLoop()
     }
 
     private fun startSyncLoop() {
@@ -50,6 +52,21 @@ class CloudSyncService : Service() {
                 if (batch.isNotEmpty()) {
                     val result = repo.postBatch(batch)
                     Log.d(TAG, "Sync batch ${batch.size} → ${if (result.isSuccess) "OK" else "FAIL: ${result.exceptionOrNull()?.message}"}")
+                }
+            }
+        }
+    }
+
+    private fun startEcgUploadLoop() {
+        scope.launch {
+            while (isActive) {
+                delay(10_000)
+                val pid = SessionManager(applicationContext).getPatientId()
+                if (pid == -1) continue
+                val snapshot = EcgBuffer.drainLast(750)
+                if (snapshot.isNotEmpty()) {
+                    val result = repo.postEcg(pid, snapshot)
+                    Log.d(TAG, "ECG upload ${snapshot.size} val → ${if (result.isSuccess) "OK" else "FAIL: ${result.exceptionOrNull()?.message}"}")
                 }
             }
         }

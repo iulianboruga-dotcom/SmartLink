@@ -45,6 +45,7 @@ import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.example.smartlink_multi.data.EcgBuffer
 import com.example.smartlink_multi.data.SensorBuffer
 import com.example.smartlink_multi.data.network.dto.SensorDataDto
 import com.example.smartlink_multi.data.prefs.SessionManager
@@ -53,6 +54,7 @@ import org.json.JSONObject
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
+
 
     companion object {
         private const val TAG = "SmartLinkMulti"
@@ -425,6 +427,8 @@ class MainActivity : AppCompatActivity() {
                 // Log only every 10th packet to avoid flooding the log view
                 val pkt = viewModel.packetCount.value ?: 0
                 if (pkt % 10 == 0) viewModel.addLog("ECG #$pkt: ${samples.size} val")
+                // Colectare pentru upload backend — doar dacă e logat
+                if (SessionManager(applicationContext).getPatientId() != -1) EcgBuffer.addAll(samples)
             }
             STATUS_CHAR_UUID -> {
                 // Parse JSON status payload from the ESP32.
