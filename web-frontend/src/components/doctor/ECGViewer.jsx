@@ -78,7 +78,7 @@ export default function ECGViewer({ patientId }) {
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={visibleData} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
               <XAxis dataKey="index" type="number" domain={[0, allData.length]} hide />
-              <YAxis domain={[380, 720]} hide />
+              <YAxis domain={['auto', 'auto']} hide />
               <Tooltip
                 contentStyle={{ backgroundColor: '#111', border: '1px solid #00ff41', color: '#00ff41' }}
                 formatter={(v) => [`${v}`, 'ECG ADC']}
