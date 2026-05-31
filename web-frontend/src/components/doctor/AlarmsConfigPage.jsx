@@ -1,15 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-  Box, Typography, Toolbar, Grid, MenuItem, TextField, CircularProgress,
-} from '@mui/material';
-import DoctorNavbar from './DoctorNavbar';
-import AlarmHistory from './AlarmHistory';
-import AlarmThresholdForm from './AlarmThresholdForm';
-import { getPatients } from '../../api';
+  Box,
+  Typography,
+  Toolbar,
+  Grid,
+  MenuItem,
+  TextField,
+  CircularProgress,
+} from "@mui/material";
+import DoctorNavbar from "./DoctorNavbar";
+import AlarmHistory from "./AlarmHistory";
+import AlarmThresholdForm from "./AlarmThresholdForm";
+import { getPatients } from "../../api";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import { useNavigate } from "react-router-dom";
 
 export default function AlarmsConfigPage() {
   const [patients, setPatients] = useState([]);
-  const [selectedPatient, setSelectedPatient] = useState('');
+  const [selectedPatient, setSelectedPatient] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,12 +28,38 @@ export default function AlarmsConfigPage() {
     });
   }, []);
 
+  const navigate = useNavigate();
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        bgcolor: "background.default",
+      }}
+    >
       <DoctorNavbar />
       <Toolbar />
       <Box sx={{ p: 3 }}>
-        <Typography variant="h5" gutterBottom>Gestionare alarme</Typography>
+        <Box
+          onClick={() => navigate(-1)}
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.5,
+            cursor: "pointer",
+            color: "#6b7280",
+            mb: 2,
+            "&:hover": { color: "#4B6CF5" },
+          }}
+        >
+          <ChevronLeftIcon sx={{ fontSize: 20 }} />
+          <Typography variant="body2">Înapoi</Typography>
+        </Box>
+        <Typography variant="h5" gutterBottom>
+          Gestionare alarme
+        </Typography>
 
         {loading ? (
           <CircularProgress />

@@ -30,6 +30,13 @@ import AlarmsPage from "./components/doctor/AlarmsPage";
 
 import AddPatientForm from "./components/doctor/AddPatientForm";
 
+//Formular Programari
+
+import SchedulePage from "./components/doctor/SchedulePage";
+
+//Profil Doctor
+import DoctorProfile from "./components/doctor/DoctorProfile";
+
 export default function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -119,6 +126,23 @@ export default function App() {
             }
           />
           <Route path="/add-patient" element={<AddPatientForm />} />
+
+          <Route
+            path="/doctor/schedule"
+            element={
+              <ProtectedRoute requiredRole="doctor">
+                <SchedulePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/doctor/profile"
+            element={
+              <ProtectedRoute requiredRole="doctor">
+                <DoctorProfile />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
