@@ -286,6 +286,11 @@ export default function DoctorDashboard() {
       icon: <CalendarMonthIcon />,
     },
     { label: "Pacienți", path: "/doctor/patients", icon: <PeopleAltIcon /> },
+    {
+      label: "Alarme",
+      path: "/doctor/alarms",
+      icon: <NotificationsActiveIcon />,
+    },
     { label: "Profil", path: "/doctor/profile", icon: <AccountCircleIcon /> },
   ];
 
@@ -483,7 +488,7 @@ export default function DoctorDashboard() {
                 lineHeight: 1.2,
               }}
             >
-              Bună ziua, Dr. {user.firstName || ""} {user.lastName || ""}
+              Bună ziua, Dr. {user.firstName || ""} {user.lastName || "Andreas"}
               !
             </Typography>
             <Typography sx={{ fontSize: 13, color: C.muted, mt: 0.3 }}>
@@ -586,11 +591,27 @@ export default function DoctorDashboard() {
                   Lista recentă de pacienți
                 </Typography>
               </Box>
+
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                {/* Buton Adaugă */}
+                <Button
+                  variant="contained"
+                  size="small"
+                  sx={{
+                    bgcolor: C.blue,
+                    borderRadius: "8px",
+                    textTransform: "none",
+                    fontSize: 12,
+                    height: 32,
+                  }}
+                  onClick={() => navigate("/add-patient")}
+                >
+                  Adaugă Pacienți
+                </Button>
+
                 {/* Search */}
                 <Box
                   sx={{
-                    position: "relative",
                     display: "flex",
                     alignItems: "center",
                     gap: 0.8,
@@ -601,24 +622,10 @@ export default function DoctorDashboard() {
                     border: `1px solid ${C.border}`,
                   }}
                 >
-                  <Button
-                    variant="contained"
-                    sx={{
-                      position: "absolute",
-                      left: -150, // scoatem butonul în afară spre stânga
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      height: 28,
-                      bgcolor: "#7493df",
-                    }}
-                    onClick={() => navigate("/add-patient")}
-                  >
-                    Adaugă Pacienți
-                  </Button>
-
+                  <style>{`.search-white::placeholder { color: white; opacity: 1; }`}</style>
                   <SearchIcon sx={{ fontSize: 14, color: "white" }} />
-
                   <input
+                    className="search-white"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Caută pacient..."
@@ -627,12 +634,13 @@ export default function DoctorDashboard() {
                       outline: "none",
                       background: "transparent",
                       fontSize: 13,
-                      color: "C.text",
+                      color: "white",
                       width: 130,
                     }}
                   />
                 </Box>
 
+                {/* Sort */}
                 {/* Sort */}
 
                 <TextField
