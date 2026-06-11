@@ -23,7 +23,7 @@ export default function PatientAlarms() {
   const [sortOrder, setSortOrder] = useState('desc');
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const patientId = user.id;
+  const patientId = user.patientId;
 
   useEffect(() => {
     if (patientId) {

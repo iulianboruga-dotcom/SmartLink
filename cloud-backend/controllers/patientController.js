@@ -70,6 +70,14 @@ async function registerPatient(req, res, next) {
         .query(`INSERT INTO patient_doctor (patient_id, doctor_id) VALUES (@patientId, @doctorId)`);
     }
 
+    // Praguri default (aceleași valori ca seed Ana / patient_id=10)
+    await new sql.Request(transaction)
+      .input('patientId', sql.Int, patientResult.recordset[0].id)
+      .query(`
+        INSERT INTO alarm_thresholds (patient_id, pulse_min, pulse_max, temp_min, temp_max, hum_min, hum_max)
+        VALUES (@patientId, 50, 120, 35.5, 38.0, 30.0, 70.0)
+      `);
+
     // Confirmare tranzactie
     await transaction.commit();
 

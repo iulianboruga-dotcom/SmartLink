@@ -15,7 +15,7 @@ export default function PatientRecommendations() {
   const [loading, setLoading] = useState(true);
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const patientId = user.id;
+  const patientId = user.patientId;
 
   useEffect(() => {
     if (patientId) {
