@@ -6,18 +6,18 @@ import {
 import { getAlarms } from '../../api';
 
 const alarmTypeLabel = {
-  PULSE_HIGH: 'Puls ridicat',
-  PULSE_LOW: 'Puls scăzut',
-  TEMP_HIGH: 'Temperatură ridicată',
-  TEMP_LOW: 'Temperatură scăzută',
-  HUM_HIGH: 'Umiditate ridicată',
-  HUM_LOW: 'Umiditate scăzută',
+  pulse_high: 'Puls ridicat',
+  pulse_low: 'Puls scăzut',
+  temp_high: 'Temperatură ridicată',
+  temp_low: 'Temperatură scăzută',
+  hum_high: 'Umiditate ridicată',
+  hum_low: 'Umiditate scăzută',
 };
 
 const alarmUnit = {
-  PULSE_HIGH: 'bpm', PULSE_LOW: 'bpm',
-  TEMP_HIGH: '°C', TEMP_LOW: '°C',
-  HUM_HIGH: '%', HUM_LOW: '%',
+  pulse_high: 'bpm', pulse_low: 'bpm',
+  temp_high: '°C', temp_low: '°C',
+  hum_high: '%', hum_low: '%',
 };
 
 export default function AlarmHistory({ patientId }) {
