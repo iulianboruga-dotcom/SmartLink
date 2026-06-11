@@ -1,25 +1,55 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Card, CardContent, Typography, CircularProgress, IconButton } from '@mui/material';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
-import { getECGData } from '../../api';
+import { getECGData, getECGList } from '../../api';
+
+function formatDate(iso) {
+  return new Date(iso).toLocaleString('ro-RO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+const BTN = {
+  color: '#00ff41',
+  border: '1px solid #00ff41',
+  borderRadius: '4px',
+  px: 1.5, py: 0.5,
+  fontSize: '14px',
+  fontFamily: 'monospace',
+};
 
 export default function ECGChart({ patientId }) {
-  const [allData,      setAllData]      = useState([]);
+  const [recordings, setRecordings]     = useState([]);   // [{id, recordedAt}, ...]
+  const [recIndex, setRecIndex]         = useState(0);    // 0 = cea mai recentă
+  const [allData, setAllData]           = useState([]);
   const [visibleCount, setVisibleCount] = useState(0);
-  const [loading,      setLoading]      = useState(true);
-  const [playing,      setPlaying]      = useState(false);
+  const [loading, setLoading]           = useState(true);
+  const [playing, setPlaying]           = useState(false);
   const timerRef = useRef(null);
 
+  // Încarcă lista de înregistrări la mount
   useEffect(() => {
-    if (patientId) {
-      getECGData(patientId).then((d) => {
-        setAllData(d);
-        setVisibleCount(d.length);
-        setLoading(false);
-      });
-    }
+    if (!patientId) return;
+    getECGList(patientId).then((list) => {
+      setRecordings(list);
+      setRecIndex(0);
+    });
   }, [patientId]);
 
+  // Când se schimbă înregistrarea selectată, încarcă datele ei
+  useEffect(() => {
+    if (!patientId || recordings.length === 0) return;
+    setPlaying(false);
+    setLoading(true);
+    const rec = recordings[recIndex];
+    getECGData(patientId, rec.id).then((d) => {
+      setAllData(d);
+      setVisibleCount(d.length);
+      setLoading(false);
+    });
+  }, [patientId, recIndex, recordings]);
+
+  // Animație Play
   useEffect(() => {
     clearInterval(timerRef.current);
     if (!playing) return;
@@ -37,29 +67,44 @@ export default function ECGChart({ patientId }) {
     setPlaying((p) => !p);
   };
 
+  const goBack = () => { setRecIndex((i) => Math.min(i + 1, recordings.length - 1)); };
+  const goFwd  = () => { setRecIndex((i) => Math.max(i - 1, 0)); };
+
+  const currentRec = recordings[recIndex];
+
   return (
     <Card sx={{ bgcolor: '#0a0a0a', color: '#00ff41' }}>
       <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
           <Typography variant="h6" sx={{ color: '#00ff41', fontFamily: 'monospace' }}>
             ECG
           </Typography>
-          <IconButton
-            onClick={togglePlay}
-            disabled={loading || allData.length === 0}
-            sx={{
-              color: playing ? '#ffcc00' : '#00ff41',
-              border: `1px solid ${playing ? '#ffcc00' : '#00ff41'}`,
-              borderRadius: '4px',
-              px: 1.5, py: 0.5,
-              fontSize: '14px',
-              fontFamily: 'monospace',
-            }}
-          >
+
+          {/* Navigator înregistrări */}
+          {recordings.length > 0 && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <IconButton onClick={goBack} disabled={recIndex >= recordings.length - 1} size="small"
+                sx={{ color: recIndex >= recordings.length - 1 ? '#333' : '#00ff41', p: 0.5 }}>
+                <ArrowBackIosNewIcon fontSize="small" />
+              </IconButton>
+              <Typography variant="caption" sx={{ color: '#00cc33', fontFamily: 'monospace', minWidth: 160, textAlign: 'center' }}>
+                {recIndex + 1}/{recordings.length} · {currentRec ? formatDate(currentRec.recordedAt) : ''}
+              </Typography>
+              <IconButton onClick={goFwd} disabled={recIndex <= 0} size="small"
+                sx={{ color: recIndex <= 0 ? '#333' : '#00ff41', p: 0.5 }}>
+                <ArrowForwardIosIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          )}
+
+          <IconButton onClick={togglePlay} disabled={loading || allData.length === 0}
+            sx={{ ...BTN, color: playing ? '#ffcc00' : '#00ff41', border: `1px solid ${playing ? '#ffcc00' : '#00ff41'}` }}>
             {playing ? '⏸ Pauză' : '▶ Play'}
           </IconButton>
         </Box>
 
+        {/* Grafic */}
         {loading ? (
           <CircularProgress sx={{ color: '#00ff41' }} />
         ) : allData.length === 0 ? (

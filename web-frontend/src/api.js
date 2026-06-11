@@ -113,10 +113,19 @@ export async function getLatestSensorReading(patientId) {
   return data[data.length - 1] || null;
 }
 
-export async function getECGData(patientId) {
-  const res = await fetch(`${API_URL}/sensors/ecg?patientId=${patientId}`, {
+export async function getECGList(patientId) {
+  const res = await fetch(`${API_URL}/sensors/ecg/list?patientId=${patientId}`, {
     headers: authHeaders(),
   });
+  if (!res.ok) return [];
+  return snakeToCamel(await res.json());
+}
+
+export async function getECGData(patientId, recordingId) {
+  const url = recordingId
+    ? `${API_URL}/sensors/ecg?patientId=${patientId}&recordingId=${recordingId}`
+    : `${API_URL}/sensors/ecg?patientId=${patientId}`;
+  const res = await fetch(url, { headers: authHeaders() });
   if (!res.ok) return [];
   return snakeToCamel(await res.json());
 }

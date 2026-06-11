@@ -102,8 +102,8 @@ async function receiveECG(req, res, next) {
   }
 }
 
-// Citire istoric ECG pentru un pacient
-async function getECGHistory(req, res, next) {
+// Lista tuturor înregistrărilor ECG ale unui pacient (id + recorded_at)
+async function getECGList(req, res, next) {
   try {
     const { patientId } = req.query;
     if (!patientId) return res.status(400).json({ error: 'patientId obligatoriu' });
@@ -116,11 +116,49 @@ async function getECGHistory(req, res, next) {
     const result = await pool.request()
       .input('patientId', sql.Int, patientId)
       .query(`
-        SELECT TOP 1 ecg_values, recorded_at
+        SELECT id, recorded_at
         FROM ecg_data
         WHERE patient_id = @patientId
         ORDER BY recorded_at DESC
       `);
+
+    res.json(result.recordset);
+  } catch (err) {
+    next(err);
+  }
+}
+
+// Citire înregistrare ECG — cea mai recentă sau după recordingId
+async function getECGHistory(req, res, next) {
+  try {
+    const { patientId, recordingId } = req.query;
+    if (!patientId) return res.status(400).json({ error: 'patientId obligatoriu' });
+
+    const pool = await getPool();
+    if (!(await patientExists(pool, patientId))) {
+      return res.status(404).json({ error: 'Pacient negasit' });
+    }
+
+    let result;
+    if (recordingId) {
+      result = await pool.request()
+        .input('id', sql.Int, recordingId)
+        .input('patientId', sql.Int, patientId)
+        .query(`
+          SELECT ecg_values, recorded_at
+          FROM ecg_data
+          WHERE id = @id AND patient_id = @patientId
+        `);
+    } else {
+      result = await pool.request()
+        .input('patientId', sql.Int, patientId)
+        .query(`
+          SELECT TOP 1 ecg_values, recorded_at
+          FROM ecg_data
+          WHERE patient_id = @patientId
+          ORDER BY recorded_at DESC
+        `);
+    }
 
     if (result.recordset.length === 0) return res.json([]);
 
@@ -215,4 +253,4 @@ async function getHistory(req, res, next) {
   }
 }
 
-module.exports = { receiveSensorData, receiveECG, receiveAccelerometer, getHistory, getECGHistory };
+module.exports = { receiveSensorData, receiveECG, receiveAccelerometer, getHistory, getECGHistory, getECGList };
