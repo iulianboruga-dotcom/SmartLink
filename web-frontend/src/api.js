@@ -50,6 +50,14 @@ export async function logout() {
   localStorage.removeItem("user");
 }
 
+// ─── Medici ──────────────────────────────────────────────────────────────────
+
+export async function getDoctors() {
+  const res = await fetch(`${API_URL}/doctors`);
+  if (!res.ok) throw new Error(`Eroare ${res.status}`);
+  return snakeToCamel(await res.json());
+}
+
 // ─── Pacienți ────────────────────────────────────────────────────────────────
 
 export async function getPatients() {
@@ -66,6 +74,16 @@ export async function getPatientById(patientId) {
   });
   if (!res.ok) throw new Error(`Eroare ${res.status}`);
   return snakeToCamel(await res.json());
+}
+
+export async function unassignDoctor(patientId, doctorId) {
+  const res = await fetch(`${API_URL}/patients/unassign-doctor`, {
+    method: "DELETE",
+    headers: authHeaders(),
+    body: JSON.stringify({ patientId, doctorId }),
+  });
+  if (!res.ok) throw new Error(`Eroare ${res.status}`);
+  return res.json();
 }
 
 export async function updatePatient(patientId, data) {

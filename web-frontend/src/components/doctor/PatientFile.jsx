@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Box,
+  Button,
   Typography,
   CircularProgress,
   Grid,
@@ -23,7 +24,7 @@ import ECGViewer from "./ECGViewer";
 import AlarmThresholdForm from "./AlarmThresholdForm";
 import AlarmHistory from "./AlarmHistory";
 import RecommendationsManager from "./RecommendationsManager";
-import { getPatientById, getLatestSensorReading } from "../../api";
+import { getPatientById, getLatestSensorReading, unassignDoctor } from "../../api";
 import { getPatientStatus } from "../../mockData";
 
 const statusColor = { Normal: "success", Atenție: "warning", Critic: "error" };
@@ -35,6 +36,7 @@ export default function PatientFile() {
   const [reading, setReading] = useState(null);
   const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [unassigning, setUnassigning] = useState(false);
 
   useEffect(() => {
     loadPatient();
@@ -47,6 +49,20 @@ export default function PatientFile() {
     setPatient(p);
     setReading(r);
     setLoading(false);
+  };
+
+  const handleUnassign = async () => {
+    if (!window.confirm('Elimini pacientul din lista ta? Pacientul rămâne în DB și se poate reloga.')) return;
+    const loggedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    setUnassigning(true);
+    try {
+      await unassignDoctor(Number(id), loggedUser.doctorId);
+      navigate('/doctor');
+    } catch (err) {
+      alert('Eroare la dezasignare: ' + err.message);
+    } finally {
+      setUnassigning(false);
+    }
   };
 
   if (loading) {
@@ -79,7 +95,8 @@ export default function PatientFile() {
       <Toolbar />
       <Box sx={{ p: 3 }}>
         {/* Header pacient */}
-        <Box sx={{ display: "flex", alignItems: "center", mb: 3, gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <IconButton onClick={() => navigate("/doctor")} size="small">
             <ArrowBackIcon />
           </IconButton>
@@ -98,6 +115,16 @@ export default function PatientFile() {
               <Chip label={status} color={statusColor[status]} size="small" />
             </Box>
           </Box>
+          </Box>
+          <Button
+            variant="outlined"
+            color="error"
+            size="small"
+            onClick={handleUnassign}
+            disabled={unassigning}
+          >
+            {unassigning ? "Se procesează..." : "Elimină din lista mea"}
+          </Button>
         </Box>
 
         {/* Citiri curente */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box, Card, CardContent, TextField, Button, Typography,
   ToggleButton, ToggleButtonGroup, Alert, CircularProgress, MenuItem,
@@ -8,7 +8,7 @@ import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate, Link } from 'react-router-dom';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://smartlink-api.azurewebsites.net/api';
 
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -27,9 +27,18 @@ export default function RegisterPage() {
     weight: '',
     height: '',
     bloodType: '',
+    doctorId: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [doctors, setDoctors] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_URL}/doctors`)
+      .then((r) => r.json())
+      .then((data) => setDoctors(data))
+      .catch(() => {});
+  }, []);
 
   const handleChange = (field) => (e) => {
     setForm({ ...form, [field]: e.target.value });
@@ -41,6 +50,7 @@ export default function RegisterPage() {
     if (form.password.length < 6) return 'Parola trebuie să aibă cel puțin 6 caractere.';
     if (form.password !== form.confirmPassword) return 'Parolele nu coincid.';
     if (!form.firstName || !form.lastName) return 'Prenumele și numele sunt obligatorii.';
+    if (role === 'patient' && !form.doctorId) return 'Trebuie să alegi un medic curant.';
     return null;
   };
 
@@ -78,6 +88,7 @@ export default function RegisterPage() {
             weight: parseFloat(form.weight),
             height: parseFloat(form.height),
             bloodType: form.bloodType,
+            ...(form.doctorId ? { doctorId: Number(form.doctorId) } : {}),
           };
 
       const res = await fetch(endpoint, {
@@ -171,6 +182,14 @@ export default function RegisterPage() {
                   onChange={handleChange('bloodType')} sx={{ mb: 2 }}>
                   {BLOOD_TYPES.map((bt) => (
                     <MenuItem key={bt} value={bt}>{bt}</MenuItem>
+                  ))}
+                </TextField>
+                <TextField fullWidth select label="Medic curant *" value={form.doctorId}
+                  onChange={handleChange('doctorId')} required sx={{ mb: 2 }}>
+                  {doctors.map((d) => (
+                    <MenuItem key={d.id} value={d.id}>
+                      Dr. {d.first_name} {d.last_name}{d.specialization ? ` — ${d.specialization}` : ''}
+                    </MenuItem>
                   ))}
                 </TextField>
               </>

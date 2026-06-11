@@ -33,8 +33,6 @@ import {
 } from "../../api";
 import { getPatientStatus } from "../../mockData";
 import Button from "@mui/material/Button";
-import AddPatientForm from "./AddPatientForm";
-
 const C = {
   blue: "#4B6CF5",
   blueLight: "#EEF2FF",
@@ -593,22 +591,6 @@ export default function DoctorDashboard() {
               </Box>
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                {/* Buton Adaugă */}
-                <Button
-                  variant="contained"
-                  size="small"
-                  sx={{
-                    bgcolor: C.blue,
-                    borderRadius: "8px",
-                    textTransform: "none",
-                    fontSize: 12,
-                    height: 32,
-                  }}
-                  onClick={() => navigate("/add-patient")}
-                >
-                  Adaugă Pacienți
-                </Button>
-
                 {/* Search */}
                 <Box
                   sx={{

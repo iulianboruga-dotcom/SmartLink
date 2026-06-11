@@ -26,10 +26,6 @@ import PatientsPage from "./components/doctor/PatientsPage";
 
 import AlarmsPage from "./components/doctor/AlarmsPage";
 
-//Formular pentru adaugat pacienti
-
-import AddPatientForm from "./components/doctor/AddPatientForm";
-
 //Formular Programari
 
 import SchedulePage from "./components/doctor/SchedulePage";
@@ -125,8 +121,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/add-patient" element={<AddPatientForm />} />
-
           <Route
             path="/doctor/schedule"
             element={

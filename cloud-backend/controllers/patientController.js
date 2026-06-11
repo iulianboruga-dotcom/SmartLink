@@ -12,7 +12,7 @@ async function registerPatient(req, res, next) {
     // Pornire tranzactie
     await transaction.begin();
 
-    const { email, password, firstName, lastName, age, weight, height, bloodType} = req.body;
+    const { email, password, firstName, lastName, age, weight, height, bloodType, doctorId } = req.body;
 
     // Validare input
     if (!email || !password || !firstName || !lastName) {
@@ -62,6 +62,13 @@ async function registerPatient(req, res, next) {
         INSERT INTO patients ( user_id, age, weight, height, blood_type )
         OUTPUT INSERTED.id, INSERTED.age, INSERTED.weight, INSERTED.height, INSERTED.blood_type
         VALUES ( @userId, @age, @weight, @height, @bloodType ) `);
+
+    if (doctorId) {
+      await new sql.Request(transaction)
+        .input('patientId', sql.Int, patientResult.recordset[0].id)
+        .input('doctorId', sql.Int, Number(doctorId))
+        .query(`INSERT INTO patient_doctor (patient_id, doctor_id) VALUES (@patientId, @doctorId)`);
+    }
 
     // Confirmare tranzactie
     await transaction.commit();
