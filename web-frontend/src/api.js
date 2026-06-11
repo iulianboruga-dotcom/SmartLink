@@ -11,7 +11,7 @@ import {
   mockRecommendations,
 } from "./mockData";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
+const API_URL = process.env.REACT_APP_API_URL || "https://smartlink-api.azurewebsites.net/api";
 
 function toCamelCase(s) {
   return s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
