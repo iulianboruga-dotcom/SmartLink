@@ -80,12 +80,12 @@ export default function PatientAlarms() {
                         <TableCell sx={{ whiteSpace: 'nowrap' }}>
                           {new Date(alarm.triggeredAt).toLocaleString('ro-RO')}
                         </TableCell>
-                        <TableCell>{alarmTypeLabel[alarm.type] || alarm.type}</TableCell>
+                        <TableCell>{alarmTypeLabel[alarm.alarmType] || alarm.alarmType}</TableCell>
                         <TableCell align="right">
-                          {alarm.measuredValue} {alarmUnit[alarm.type]}
+                          {alarm.measuredValue} {alarmUnit[alarm.alarmType]}
                         </TableCell>
                         <TableCell align="right">
-                          {alarm.thresholdValue} {alarmUnit[alarm.type]}
+                          {alarm.thresholdValue} {alarmUnit[alarm.alarmType]}
                         </TableCell>
                         <TableCell>
                           <Chip

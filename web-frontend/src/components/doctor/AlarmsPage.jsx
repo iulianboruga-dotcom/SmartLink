@@ -63,7 +63,7 @@ const alarmUnit = {
 function getSeverity(alarm) {
   if (alarm.acknowledged) return "rezolvat";
   const diff = Math.abs(alarm.measuredValue - alarm.thresholdValue);
-  const type = alarm.type;
+  const type = alarm.alarmType;
 
   if (type === "pulse_high" || type === "pulse_low") {
     if (diff >= 30) return "critic";
@@ -153,7 +153,7 @@ function TypeIcon({ type }) {
 
 function DeviationBar({ alarm }) {
   const diff = alarm.measuredValue - alarm.thresholdValue;
-  const isHigh = alarm.type?.includes("HIGH");
+  const isHigh = alarm.alarmType?.includes("high");
   const pct = Math.min(
     (Math.abs(diff) / (alarm.thresholdValue * 0.3)) * 100,
     100,
@@ -165,7 +165,7 @@ function DeviationBar({ alarm }) {
       <Typography
         sx={{ fontSize: 12, fontWeight: 600, color: C.text, minWidth: 60 }}
       >
-        {alarm.measuredValue} {alarmUnit[alarm.type]}
+        {alarm.measuredValue} {alarmUnit[alarm.alarmType]}
       </Typography>
       <Box
         sx={{
@@ -552,9 +552,9 @@ export default function AlarmsPage() {
                             gap: 0.6,
                           }}
                         >
-                          <TypeIcon type={alarm.type} />
+                          <TypeIcon type={alarm.alarmType} />
                           <Typography sx={{ fontSize: 12, color: C.text }}>
-                            {alarmTypeLabel[alarm.type] || alarm.type}
+                            {alarmTypeLabel[alarm.alarmType] || alarm.alarmType}
                           </Typography>
                         </Box>
                       </TableCell>

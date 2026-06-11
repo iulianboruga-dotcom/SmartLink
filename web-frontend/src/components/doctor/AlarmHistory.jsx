@@ -38,13 +38,13 @@ export default function AlarmHistory({ patientId }) {
   };
 
   const filtered = alarms
-    .filter((a) => filterType === 'ALL' || a.type === filterType)
+    .filter((a) => filterType === 'ALL' || a.alarmType === filterType)
     .sort((a, b) => {
       const diff = new Date(a.triggeredAt) - new Date(b.triggeredAt);
       return sortOrder === 'asc' ? diff : -diff;
     });
 
-  const alarmTypes = [...new Set(alarms.map((a) => a.type))];
+  const alarmTypes = [...new Set(alarms.map((a) => a.alarmType))];
 
   return (
     <Card>
@@ -96,12 +96,12 @@ export default function AlarmHistory({ patientId }) {
                     <TableCell sx={{ whiteSpace: 'nowrap' }}>
                       {new Date(alarm.triggeredAt).toLocaleString('ro-RO')}
                     </TableCell>
-                    <TableCell>{alarmTypeLabel[alarm.type] || alarm.type}</TableCell>
+                    <TableCell>{alarmTypeLabel[alarm.alarmType] || alarm.alarmType}</TableCell>
                     <TableCell align="right">
-                      {alarm.measuredValue} {alarmUnit[alarm.type]}
+                      {alarm.measuredValue} {alarmUnit[alarm.alarmType]}
                     </TableCell>
                     <TableCell align="right">
-                      {alarm.thresholdValue} {alarmUnit[alarm.type]}
+                      {alarm.thresholdValue} {alarmUnit[alarm.alarmType]}
                     </TableCell>
                     <TableCell>
                       <Chip
