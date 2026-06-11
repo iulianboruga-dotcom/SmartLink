@@ -4,7 +4,7 @@ import {
   TextField, CircularProgress,
 } from '@mui/material';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer, Legend,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer, Legend, Brush,
 } from 'recharts';
 import { getSensorHistory } from '../../api';
 
@@ -83,34 +83,45 @@ export default function SensorHistoryCharts({ patientId }) {
             <CircularProgress />
           </Box>
         ) : (
-          <ResponsiveContainer width="100%" height={280}>
-            <LineChart data={data} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis
-                dataKey="recordedAt"
-                tickFormatter={formatTime}
-                tick={{ fontSize: 11 }}
-                interval={Math.floor(data.length / 8)}
-              />
-              <YAxis domain={cfg.domain} tick={{ fontSize: 11 }} unit={` ${cfg.unit}`} width={60} />
-              <Tooltip
-                formatter={(v) => [`${v} ${cfg.unit}`, cfg.label]}
-                labelFormatter={(l) => new Date(l).toLocaleString('ro-RO')}
-              />
-              <Legend />
-              {/* Praguri de alarmă */}
-              <ReferenceLine y={cfg.max} stroke={cfg.color} strokeDasharray="4 4" label={{ value: `Max: ${cfg.max}`, fill: cfg.color, fontSize: 11 }} />
-              <ReferenceLine y={cfg.min} stroke={cfg.color} strokeDasharray="4 4" label={{ value: `Min: ${cfg.min}`, fill: cfg.color, fontSize: 11 }} />
-              <Line
-                type="monotone"
-                dataKey={sensor}
-                stroke={cfg.color}
-                dot={false}
-                strokeWidth={2}
-                name={cfg.label}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+              {data.length} înregistrări — trage scrubberul pentru a naviga în timp
+            </Typography>
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart data={data} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="recordedAt"
+                  tickFormatter={formatTime}
+                  tick={{ fontSize: 11 }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis domain={cfg.domain} tick={{ fontSize: 11 }} unit={` ${cfg.unit}`} width={60} />
+                <Tooltip
+                  formatter={(v) => [`${v} ${cfg.unit}`, cfg.label]}
+                  labelFormatter={(l) => new Date(l).toLocaleString('ro-RO')}
+                />
+                <Legend />
+                <ReferenceLine y={cfg.max} stroke={cfg.color} strokeDasharray="4 4" label={{ value: `Max: ${cfg.max}`, fill: cfg.color, fontSize: 11 }} />
+                <ReferenceLine y={cfg.min} stroke={cfg.color} strokeDasharray="4 4" label={{ value: `Min: ${cfg.min}`, fill: cfg.color, fontSize: 11 }} />
+                <Line
+                  type="monotone"
+                  dataKey={sensor}
+                  stroke={cfg.color}
+                  dot={false}
+                  strokeWidth={2}
+                  name={cfg.label}
+                />
+                <Brush
+                  dataKey="recordedAt"
+                  height={24}
+                  stroke={cfg.color}
+                  tickFormatter={formatTime}
+                  startIndex={Math.max(0, data.length - 60)}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </>
         )}
       </CardContent>
     </Card>
